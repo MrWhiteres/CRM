@@ -1,0 +1,8 @@
+.idea
+backend/.idea
+backend/static
+*__pycache__
+frontend/.idea
+frontend/.vscode
+backend/db/db.sqlite3
+.env

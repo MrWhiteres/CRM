@@ -1,7 +1,3 @@
-<script setup>
-
-</script>
-
 <template>
   <MDBInput :label="labelValue" :type="typeValue" :value="modelValue" @input="updateInput"/>
 </template>
@@ -15,9 +11,18 @@ export default {
     MDBInput,
   },
   props: {
-    modelValue: [String, Number],
-    labelValue: [String],
-    typeValue: [String]
+    modelValue: {
+      type: [String, Number],
+      required: true,
+    },
+    labelValue: {
+      type: String,
+      required: true,
+    },
+    typeValue: {
+      type: String,
+      required: true,
+    }
   },
   methods: {
     updateInput(event) {

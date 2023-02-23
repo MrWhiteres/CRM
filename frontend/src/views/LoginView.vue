@@ -10,15 +10,18 @@
         :label-value="'Password'"
         :type-value="'password'"
     />
+    <google-auth/>
   </div>
 </template>
 
 <script>
 import InputUi from "../components/UI/InputUI.vue";
+import GoogleAuth from "../components/GoogleAuth.vue";
+
 
 export default {
   name: "LoginView",
-  components: {InputUi},
+  components: {GoogleAuth, InputUi},
   data() {
     return {
       email: '',

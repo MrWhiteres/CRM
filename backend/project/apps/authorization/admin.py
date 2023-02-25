@@ -21,8 +21,8 @@ class ProfileAdmin(ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('first_name', 'last_name', 'create_at', 'update_at'),
+            'fields': ( 'create_at', 'update_at'),
         }),
     )
-    list_display = ['user', 'first_name', 'last_name', 'create_at', 'update_at']
+    list_display = ['user', 'create_at', 'update_at']
     model = Profile

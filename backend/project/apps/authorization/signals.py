@@ -1,12 +1,16 @@
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from project.apps.authorization.models import Profile, User
+from project.apps.authorization.models import Profile, User, EmailActivateToken
 
 
 @receiver(post_delete, sender=Profile)
-def delete_user(sender, instance, *args, **kwargs):
-    User.objects.get(id=instance.user.id).delete()
+def delete_user(sender, instance: Profile, *args, **kwargs):
+    try:
+        EmailActivateToken.objects.get(user=instance.user).delete()
+    except EmailActivateToken.DoesNotExist:
+        pass
+    instance.user.delete()
 
 
 @receiver(post_save, sender=User)

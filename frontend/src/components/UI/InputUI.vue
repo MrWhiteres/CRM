@@ -42,7 +42,7 @@ export default {
             default: false,
         },
         counter: {
-            type: Boolean,
+            type: [Boolean, Number, String],
             default: false,
         },
         maxlength: {

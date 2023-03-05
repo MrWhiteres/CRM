@@ -1,11 +1,14 @@
-from django.http import JsonResponse, QueryDict
+from django.http import JsonResponse, QueryDict, FileResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from .serializers import TokenUserSerializer, RegistrationUserSerializer, LoginUserSerializer
+from .serializers import TokenUserSerializer, RegistrationUserSerializer, LoginUserSerializer, UserDataSerializer, \
+    EditProfileSerializer
 from .utils.auth import confirm_user, registration_user, login_user
+from .utils.edit import clear_data, update_user_data
+from .utils.renderers import renderer_user
 
 
 class LoginUserAPI(RetrieveAPIView):
@@ -64,8 +67,32 @@ class AdminAPI(RetrieveAPIView):
     permission_classes = (IsAdminUser,)
 
 
-class TestApi(RetrieveAPIView):
+class UserDataApi(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = [UserDataSerializer, EditProfileSerializer]
 
-    def get(self, request, *args, **kwargs):
-        return JsonResponse(data={'test': 'test'}, status=HTTP_200_OK)
+    def serialize_data(self, data: dict) -> dict or bool:
+        for serializer in self.serializer_class:
+            data_serializer = serializer(data=data)
+            if data_serializer.is_valid():
+                return {**data_serializer.validated_data}
+        return False
+
+    def get(self, request: Request, *args, **kwargs) -> JsonResponse:
+        data = self.serialize_data(data=renderer_user(user=request.user))
+        return JsonResponse(data=data, status=HTTP_200_OK)
+
+    def post(self, request: Request, *args, **kwargs) -> JsonResponse:
+        data = self.serialize_data(data=clear_data(request.data))
+        update_user = update_user_data(data, request.user)
+        return JsonResponse(data={}, status=HTTP_200_OK)
+
+
+class ImageAPI(RetrieveAPIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, *args, **kwargs) -> FileResponse:
+        image = request.user.profile.image
+        response = FileResponse(open(image.path, 'rb'))
+        response['Content-Disposition'] = f'attachment; filename={image.name}'
+        return response

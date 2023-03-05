@@ -1,38 +1,72 @@
 <template>
-  <MDBInput :label="labelValue" :type="typeValue" :value="modelValue" @input="updateInput"/>
+    <v-text-field
+            v-model="inputValue"
+            :counter="counter"
+            :dense="dense"
+            :label="label"
+            :maxlength="maxlength"
+            :minlength="minlength"
+            :outlined="outlined"
+            :placeholder="placeholder"
+            :rules="rules"
+            :type="type"
+    />
 </template>
 
 <script>
-import {MDBInput} from "mdb-vue-ui-kit";
-
 export default {
-  name: "input-ui",
-  components: {
-    MDBInput,
-  },
-  props: {
-    modelValue: {
-      type: [String, Number],
-      required: true,
+    name: 'input-ui',
+    props: {
+        label: {
+            type: String,
+            default: '',
+        },
+        rules: {
+            type: Array,
+            default: () => [],
+        },
+        placeholder: {
+            type: String,
+            default: '',
+        },
+        type: {
+            type: String,
+            default: 'text',
+        },
+        outlined: {
+            type: Boolean,
+            default: true,
+        },
+        dense: {
+            type: Boolean,
+            default: false,
+        },
+        counter: {
+            type: Boolean,
+            default: false,
+        },
+        maxlength: {
+            type: Number,
+            default: null,
+        },
+        minlength: {
+            type: Number,
+            default: null,
+        },
+        value: {
+            type: String,
+            default: '',
+        },
     },
-    labelValue: {
-      type: String,
-      required: true,
+    data() {
+        return {
+            inputValue: this.value,
+        };
     },
-    typeValue: {
-      type: String,
-      required: true,
-    }
-  },
-  methods: {
-    updateInput(event) {
-      this.$emit('update:modelValue', event.target.value);
-    }
-  }
-
+    watch: {
+        value(newValue) {
+            this.inputValue = newValue;
+        },
+    },
 };
 </script>
-
-<style scoped>
-
-</style>

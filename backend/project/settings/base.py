@@ -4,7 +4,10 @@ from os.path import join, exists
 from pathlib import Path
 
 from .config_data import (
-    KEY, EMAIL_SERVER, EMAIL_PASSWORD
+    KEY, EMAIL_SERVER, EMAIL_PASSWORD,
+    SQL_PASSWORD, SQL_USER,
+    SQL_DB, SQL_PORT, SQL_HOST,
+    SQL_ENGINE
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +32,9 @@ DJANGO_DEFAULT_APPS = [
 DOWNLOADED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    'django_resized',
+    'django_cleanup.apps.CleanupConfig'
 ]
 
 PROJECT_APPS = [
@@ -81,13 +86,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.network.wsgi.application'
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_DIR / 'db.sqlite3',
-    }
-}
+        "ENGINE": SQL_ENGINE or "django.db.backends.sqlite3",
+        "NAME": SQL_DB or DB_DIR / 'db.sqlite3',
+        "USER": SQL_USER or "user",
+        "PASSWORD": SQL_PASSWORD or "password",
+        "HOST": SQL_HOST or "localhost",
+        "PORT": SQL_PORT or "5432",
+    }}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

@@ -1,0 +1,79 @@
+version: '3.9'
+
+services:
+  database:
+    container_name: Postgres
+    restart: unless-stopped
+    image: postgres:15-alpine3.17
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - ${PORTS_DB}
+
+  pgbackups:
+    container_name: Backup
+    image: prodrigestivill/postgres-backup-local
+    restart: unless-stopped
+    volumes:
+      - ./backup:/backups
+    links:
+      - database:database
+    depends_on:
+      - database
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_EXTRA_OPTS: -Z9 --schema=public --blobs
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+      HEALTHCHECK_PORT: 81
+
+  django:
+    container_name: Django_API
+    restart: unless-stopped
+    build:
+      context: ./backend/.
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./backend/.
+        target: /backend
+      - type: bind
+        source: ./backend/static
+        target: /static
+      - type: bind
+        source: ./backend/media
+        target: /media
+    depends_on:
+      - database
+    ports:
+      - ${DJANGO_PORTS}
+
+  nginx:
+    container_name: Nginx
+    restart: unless-stopped
+    build:
+      context: ./nginx/.
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./backend/static/
+        target: /backend/static/
+      - type: bind
+        source: ./backend/media
+        target: /backend/media
+    ports:
+      - ${NGINX_PORTS}
+    depends_on:
+      - django
+
+volumes:
+  pgdata:

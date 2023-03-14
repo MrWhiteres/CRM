@@ -1,5 +1,5 @@
 <template>
-    <v-footer class="bg-grey-lighten-1">
+    <v-footer class="bg-grey-lighten-1 v-footer">
         <v-row justify="center" no-gutters>
             <v-btn
                     v-for="link in links"
@@ -38,5 +38,14 @@ export default {
 </script>
 
 <style scoped>
+.v-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 64px;
+}
 
+body {
+  padding-bottom: 64px;
+}
 </style>

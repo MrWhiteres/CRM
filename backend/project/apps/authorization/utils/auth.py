@@ -14,7 +14,7 @@ def send_confirm_email(user: User) -> bool:
     token = user.generate_confirmation_token()
     confirm_link = f'{URL_FRONTEND}{token}'
     subject = 'Подтверждение электронной почты'
-    message = f'Добро пожаловать к нам на сайт, {user.username}!'
+    message = f'Добро пожаловать к нам на сайт, {user.email}!'
     html_template = render_to_string(
         'mail.html', {
             'title': subject,
@@ -56,14 +56,15 @@ def registration_user(data: dict) -> dict or bool:
     token = data.get('token')
     if token:
         data = get_user_data(data['token'])
-    if error_message := check_user(data['email'], 'email'):
-        return {'error': error_message}
-    if error_message := check_user(data.get('username', data.get('given_name')), 'username'):
+        print(data)
+    if error_message := check_user(data['email']):
         return {'error': error_message}
     if not (error_message := validate_password(data)):
         return {'error': error_message}
-    user = User.objects.create_user(**generate_user_data(data=data, token=True)) if token \
-        else User.objects.create_user(**generate_user_data(data=data))
+    if token:
+        user = User.objects.create_user(**generate_user_data(data=data, token=True))
+    else:
+        user = User.objects.create_user(**generate_user_data(data=data))
     profile = Profile.objects.create(user=user)
     profile.save()
     return send_confirm_email(user)
@@ -81,9 +82,9 @@ def validate_password(data: dict) -> bool:
     return password_validate if password_validate else 'InvalidPassword'
 
 
-def check_user(data: str, key: str) -> str or bool:
+def check_user(data: str) -> str or bool:
     try:
-        User.objects.get(email=data) if key == 'email' else User.objects.get(username=data)
+        User.objects.get(email=data)
         return 'UserExist'
     except User.DoesNotExist:
         return False
@@ -97,9 +98,16 @@ def get_user(email: str) -> User or bool:
 
 
 def generate_user_password(data: dict) -> str:
-    full_name = data['name']
     google_id = data['sub']
-    return f'{full_name[:3]}?{google_id[:5]}@{google_id[-6:-1]}'
+    return f'{sub_gup_upper(google_id[:5])}?{google_id[:5]}@{sub_gup_lower(google_id[-6:-1])}'
+
+
+def sub_gup_upper(string_id: str) -> str:
+    return ''.join([chr(int(letter)) for letter in string_id]).upper()
+
+
+def sub_gup_lower(string_id: str) -> str:
+    return ''.join([chr(int(letter)) for letter in string_id]).lower()
 
 
 def generate_user_data(data: dict, token: bool = False) -> dict:
@@ -107,9 +115,11 @@ def generate_user_data(data: dict, token: bool = False) -> dict:
         del data['confirm_password']
         return data
     return {
-        'username': data['given_name'],
+        'username': data['name'],
         'email': data['email'],
-        'password': generate_user_password(data)
+        'password': generate_user_password(data),
+        'first_name': data['given_name'],
+        "last_name": data['family_name']
     }
 
 

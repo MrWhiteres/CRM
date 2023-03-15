@@ -99,7 +99,15 @@ class Profile(Model):
         (OPERATOR, 'Оператор'),
     )
 
+    YOGA = 'yoga'
+    MARTIALARTS = 'martialArts'
+    SECTION = (
+        (YOGA, 'йога'),
+        (MARTIALARTS, "единоборства")
+    )
     user = OneToOneField(User, on_delete=CASCADE, db_index=True)
+    type_section = CharField(verbose_name='Тип секции', max_length=255, choices=SECTION, default=None, blank=True,
+                             null=True)
     type = CharField(
         verbose_name="Тип профиля",
         choices=USER_STATUS,
@@ -128,3 +136,19 @@ class EmailActivateToken(Model):
     user = ForeignKey(User, on_delete=DO_NOTHING)
     confirmation_token = CharField(
         verbose_name='Токен', null=True, blank=True, max_length=255)
+
+
+class TypeSection(Model):
+    section_type = CharField(verbose_name='Направление секции', max_length=255)
+
+
+class SectionYoga(Model):
+    yoga = ()
+    type_section = ForeignKey(TypeSection, verbose_name='Направление', on_delete=DO_NOTHING)
+    sub_type_section = CharField(verbose_name='Тип секции', max_length=255)
+
+
+class SectionFighter(Model):
+    fighter = ()
+    type_section = ForeignKey(TypeSection, verbose_name='Направление', on_delete=DO_NOTHING)
+    sub_type_section = CharField(verbose_name='Тип секции', max_length=255)

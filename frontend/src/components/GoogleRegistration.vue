@@ -6,12 +6,12 @@
 <script>
 import {useTokenClient} from "vue3-google-signin";
 import axios from "axios";
-import GbUi from "./UI/GoogleButtonUI.vue";
+import GbUi from "@/components/UI/GoogleButtonUI.vue";
 
 export default {
     name: "GoogleRegistration",
+  components: {GbUi},
     emits: ["registration-successful", "registration-failed"],
-    components: {GbUi},
     setup(_, {emit}) {
         const {login} = useTokenClient({
             onSuccess: async ({access_token}) => {

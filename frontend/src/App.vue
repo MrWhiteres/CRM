@@ -1,38 +1,81 @@
 <template>
-  <v-app>
-    <div>
-      <div v-if="loading" class="loader-container">
-        <div class="loader-inner">
-          <v-progress-circular :size="64" :width="7" color="primary" indeterminate></v-progress-circular>
+  <v-responsive>
+    <v-app>
+      <div>
+
+        <div v-if="loading" class="loader-container">
+          <div class="loader-inner">
+            <v-progress-circular :size="64" :width="7" color="primary" indeterminate></v-progress-circular>
+          </div>
+        </div>
+
+        <div v-else>
+          <v-app-bar app>
+            <v-app-bar-nav-icon @click="drawer = !drawer"/>
+          </v-app-bar>
+          <v-navigation-drawer
+            v-model="drawer"
+            app
+            temporary
+          >
+            <left-menu-auth v-if="store.state.user"/>
+            <left-menu-base v-else/>
+            <template v-if="store.state.user" v-slot:append>
+              <div class="pa-2">
+                <v-btn block @click="logout">
+                  Logout
+                </v-btn>
+              </div>
+            </template>
+          </v-navigation-drawer>
+          <v-main>
+            <v-responsive>
+              <v-container fluid class="v-container">
+                <router-view/>
+              </v-container>
+            </v-responsive>
+          </v-main>
         </div>
       </div>
-      <div v-else>
-        <nav-bar/>
-        <v-main class="md-5 mt-5">
-          <router-view/>
-        </v-main>
-        <footer-component/>
-      </div>
-    </div>
-
-
-  </v-app>
+    </v-app>
+  </v-responsive>
 </template>
 
 <script>
 
-import NavBar from "./components/NavBar.vue";
-import FooterComponent from "./components/FooterComponent.vue";
-import {ref, watchEffect} from "vue";
+import {computed, ref, watchEffect} from "vue";
 import axios from "axios";
-import {useStore} from 'vuex'
+import {useStore} from "vuex";
 import {useRouter} from "vue-router";
+import {useDisplay} from 'vuetify'
+import LeftMenuAuth from "@/components/LeftMenuAuth.vue";
+import LeftMenuBase from "@/components/LeftMenuBase.vue";
 
 export default {
   name: 'App',
-  components: {FooterComponent, NavBar},
+  components: {LeftMenuBase, LeftMenuAuth},
   setup() {
     const store = useStore();
+    const {name} = useDisplay()
+
+    const height = computed(() => {
+      switch (name.value) {
+        case 'xs':
+          return 220
+        case 'sm':
+          return 400
+        case 'md':
+          return 500
+        case 'lg':
+          return 600
+        case 'xl':
+          return 800
+        case 'xxl':
+          return 1200
+      }
+
+      return undefined
+    })
     store.dispatch('initializeStore');
     const router = useRouter();
 
@@ -60,7 +103,11 @@ export default {
           try {
             const responseImage = await axios.get('user/image/', {responseType: 'blob'})
             response.data.image = URL.createObjectURL(new Blob([responseImage.data], {type: 'text/plain;charset=utf-8'}))
-          } catch (_) {}
+          } catch (error) {
+            localStorage.clear()
+            this.store.commit('clearState')
+            await this.router.push({name: 'auth'})
+          }
         }
         store.commit('setUser', response.data)
       } catch (error) {
@@ -85,7 +132,9 @@ export default {
         store.commit('setAccess', response.data.access)
         await getUserProfile()
       } catch (error) {
-
+        localStorage.clear()
+        this.store.commit('clearState')
+        await this.router.push({name: 'auth'})
       }
     }
 
@@ -96,7 +145,7 @@ export default {
 
 
     setInterval(() => {
-      if (store.state.access, store.state.user) {
+      if (store.state.access && store.state.user) {
         restoreAccess()
         getUserProfile()
       }
@@ -107,15 +156,43 @@ export default {
     setTimeout(() => {
       loading.value = false
     }, 2000)
-
+    const logout = async () => {
+      localStorage.clear();
+      store.commit('clearState')
+      await router.push({name: 'auth'});
+    }
     return {
-      loading
+      loading,
+      height,
+      logout,
+      store,
+      router
+    }
+  },
+  data() {
+    return {
+      drawer: false,
+      group: null,
     }
   },
 }
 </script>
 
 <style>
+.v-container {
+  min-width: 80%;
+  max-width: 80%;
+  width: 80%;
+}
+
+@media screen and (max-width: 767px) {
+  .v-container {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
 .loader-container {
   position: fixed;
   top: 0;
@@ -134,5 +211,7 @@ export default {
   height: 100%;
 }
 </style>
+
+
 
 

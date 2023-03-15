@@ -1,14 +1,20 @@
 front:
-	cd frontend ; npm run dev
+	cd frontend ; npm run dev --host
 
 back:
 	cd backend; . venv/Scripts/activate; python manage.py runserver
 
+dock:
+	docker-compose up --build -d
+
+stop:
+	docker-compose down ; docker image prune -f
+
 ma:
-	cd backend; . venv/Scripts/activate; python manage.py makemigrations
+	docker exec -it Django_API sh -c "python manage.py makemigrations"
 
 mi:
-	cd backend; . venv/Scripts/activate; python manage.py migrate
+	docker exec -it Django_API sh -c "python manage.py migrate"
 
 su:
 	cd backend; . venv/Scripts/activate; python manage.py createsuperuser

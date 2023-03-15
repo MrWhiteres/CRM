@@ -113,14 +113,11 @@
 </template>
 
 <script>
-import InputUi from "./UI/InputUI.vue";
-import GoogleRegistration from "./GoogleRegistration.vue";
-import SubmitButtonUi from "./UI/SubmitButtonUI.vue";
 import {email, minLength, required, sameAs} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
-import ModalBaseUi from "./UI/ModaBaselUI.vue";
 import axios from "axios";
 import {useRouter} from "vue-router";
+import GoogleRegistration from "@/components/GoogleRegistration.vue";
 
 const emailPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 const passwordPattern = /^\S*(?=\S{8,})(?=\S*\d)(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[!@#$%^&*? ])\S*$/
@@ -133,7 +130,7 @@ const passwordValidate = (value) => {
 
 export default {
   name: "RegistrationView",
-  components: {ModalBaseUi, SubmitButtonUi, GoogleRegistration, InputUi},
+  components: {GoogleRegistration},
   setup() {
     const v$ = useVuelidate()
     const router$ = useRouter()

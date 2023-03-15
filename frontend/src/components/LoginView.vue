@@ -60,15 +60,13 @@
 </template>
 
 <script>
-import InputUi from "./UI/InputUI.vue";
-import GoogleAuth from "./GoogleAuth.vue";
+
 import {email, minLength, required} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
-import SubmitButtonUi from "./UI/SubmitButtonUI.vue";
-import ModalBaseUi from "./UI/ModaBaselUI.vue";
 import axios from "axios";
 import {mapMutations, useStore} from "vuex";
 import {useRouter} from "vue-router";
+import GoogleAuth from "@/components/GoogleAuth.vue";
 
 const emailPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 const passwordPattern = /^\S*(?=\S{8,})(?=\S*\d)(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[!@#$%^&*? ])\S*$/
@@ -81,7 +79,7 @@ const passwordValidate = (value) => {
 
 export default {
   name: "LoginView",
-  components: {ModalBaseUi, SubmitButtonUi, GoogleAuth, InputUi},
+  components: {GoogleAuth},
   setup() {
     const store = useStore();
     const router = useRouter();

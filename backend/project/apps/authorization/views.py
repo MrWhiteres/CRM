@@ -56,6 +56,7 @@ class ConfirmAPI(RetrieveAPIView):
 
     def post(self, request: Request, *args, **kwargs) -> JsonResponse:
         data = self.serializer_class(data=request.data)
+        print(data)
         if not data.is_valid():
             return JsonResponse(data={}, status=HTTP_400_BAD_REQUEST)
         if confirm_user({**data.validated_data}['token']):
@@ -76,6 +77,7 @@ class UserDataApi(RetrieveAPIView):
             data_serializer = serializer(data=data)
             if data_serializer.is_valid():
                 return {**data_serializer.validated_data}
+            print(data_serializer.errors)
         return False
 
     def get(self, request: Request, *args, **kwargs) -> JsonResponse:

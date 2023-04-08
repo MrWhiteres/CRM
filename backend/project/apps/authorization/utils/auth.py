@@ -56,7 +56,6 @@ def registration_user(data: dict) -> dict or bool:
     token = data.get('token')
     if token:
         data = get_user_data(data['token'])
-        print(data)
     if error_message := check_user(data['email']):
         return {'error': error_message}
     if not (error_message := validate_password(data)):
@@ -115,7 +114,6 @@ def generate_user_data(data: dict, token: bool = False) -> dict:
         del data['confirm_password']
         return data
     return {
-        'username': data['name'],
         'email': data['email'],
         'password': generate_user_password(data),
         'first_name': data['given_name'],

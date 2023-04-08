@@ -1,16 +1,16 @@
 <template>
-    <v-btn type="submit" :text="textButton">
-    </v-btn>
+  <v-btn :text="textButton" type="submit">
+  </v-btn>
 </template>
 
 <script>
 export default {
-    name: "submit-button-ui",
-    props: {
-        textButton: {
-            String,
-        }
+  name: "submit-button-ui",
+  props: {
+    textButton: {
+      String,
     }
+  }
 }
 </script>
 

@@ -6,6 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 COPY . .
+
 RUN chmod +x backend.sh
 RUN pip3 install -r requirements.txt
-ENTRYPOINT ["./backend.sh"]
+#ENTRYPOINT ["./backend.sh"]
+

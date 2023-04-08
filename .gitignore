@@ -1,6 +1,8 @@
 .idea
 backend/.idea
 backend/static
+backend/media
+backend/logs
 *__pycache__
 frontend/.idea
 frontend/.vscode
@@ -8,3 +10,4 @@ backend/db/db.sqlite3
 .env
 frontend/node_modules
 .vscode
+pgdata

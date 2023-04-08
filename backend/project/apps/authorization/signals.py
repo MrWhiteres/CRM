@@ -1,7 +1,7 @@
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 
-from project.apps.authorization.models import Profile, User, EmailActivateToken
+from ..authorization.models import Profile, User, EmailActivateToken
 
 
 @receiver(post_delete, sender=Profile)

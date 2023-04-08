@@ -144,15 +144,16 @@
 
 
 <script>
-import InputUi from "./UI/InputUI.vue";
 import {useStore} from "vuex";
 import axios from "axios";
 import {useRouter} from "vue-router";
 import {maxLength, minLength, numeric} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
+import InputUi from "@/components/UI/InputUI.vue";
 
 export default {
   name: "ProfileEditor",
+  components: {InputUi},
   setup() {
     const store = useStore()
     const getCurrentUserData = async () => {
@@ -180,7 +181,6 @@ export default {
       v$: useVuelidate(),
     }
   },
-  components: {InputUi},
   mounted() {
     setInterval(async () => {
       this.v$.$touch()
@@ -273,7 +273,7 @@ export default {
     async validateImageChange() {
       const image = this.updatedUserData.image[0]
       const result = await this.isImage(image)
-      if (image && !await this.v$.$invalid && await this.isImage(image)) {
+      if (image && !this.v$.$invalid && await this.isImage(image)) {
         await this.activButton()
       } else {
         await this.disableButton()
@@ -281,7 +281,7 @@ export default {
       }
     },
     async showError(result = false) {
-      if (await this.v$.$invalid && await this.getDataUpdate() || result) {
+      if (this.v$.$invalid && await this.getDataUpdate() || result) {
         this.error = 'Помилка форми.'
         this.infoActiv = false
       }

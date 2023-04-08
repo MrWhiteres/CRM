@@ -37,7 +37,6 @@
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import axios from "axios";
-import {th} from "vuetify/locale";
 
 export default {
   name: 'ProfilePage',
@@ -71,14 +70,12 @@ export default {
         if (image) {
           response.data.image = await this.getImage()
         }
-        console.log(response.data)
         this.store.commit('setUser', response.data)
       } catch (error) {
-        if (error.response.data.code === 'user_not_found') {
-          localStorage.clear()
-          this.store.commit('clearState')
-          await this.router.push({name: 'auth'})
-        }
+        localStorage.clear()
+        this.store.commit('clearState')
+        await this.router.push({name: 'auth'})
+
       }
     },
     async getImage() {
@@ -86,6 +83,9 @@ export default {
         const responseImage = await axios.get('user/image/', {responseType: 'blob'})
         return URL.createObjectURL(new Blob([responseImage.data], {type: 'text/plain;charset=utf-8'}))
       } catch (_) {
+        localStorage.clear()
+        this.store.commit('clearState')
+        await this.router.push({name: 'auth'})
       }
     },
     editProfile() {
@@ -97,7 +97,7 @@ export default {
       this.router.push({name: 'auth'});
     }
     this.getUserProfile()
-    setInterval(()=> {
+    setInterval(() => {
       if (this.user.image !== this.store.state.user.image) {
         this.user = this.store.state.user
       }
@@ -113,5 +113,6 @@ export default {
 
 .card-base {
   min-width: 100%;
+  left: 10%;
 }
 </style>

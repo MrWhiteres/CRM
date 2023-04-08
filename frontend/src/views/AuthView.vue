@@ -23,23 +23,19 @@
 
 <script>
 
-import LoginView from "../components/LoginView.vue";
-import RegistrationView from "../components/RegistrationView.vue";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
+import LoginView from "@/components/LoginView.vue";
+import RegistrationView from "@/components/RegistrationView.vue";
 
 export default {
   name: 'Auth',
+  components: {RegistrationView, LoginView},
   setup() {
     return {
       store: useStore(),
       router: useRouter()
     }
-  },
-
-  components: {
-    RegistrationView,
-    LoginView
   },
   data() {
     return {
@@ -57,8 +53,17 @@ export default {
 
 <style>
 .card-header {
+  margin-top: 5%;
   max-width: 40%;
+  margin-left: 30%;
+  margin-right: 30%;
 }
+@media (max-width: 1100px) {
+  .card-header {
+    max-width: 60%;
+  }
+}
+
 
 @media (max-width: 767px) {
   .card-header {

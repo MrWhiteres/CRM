@@ -3,6 +3,8 @@ from os import path, mkdir
 from os.path import join, exists
 from pathlib import Path
 
+from psycopg2 import OperationalError
+
 from .config_data import (
     KEY, EMAIL_SERVER, EMAIL_PASSWORD,
     SQL_PASSWORD, SQL_USER,
@@ -39,12 +41,14 @@ DOWNLOADED_APPS = [
 
 PROJECT_APPS = [
     'project.apps.authorization',
+    'project.apps.crm'
 ]
 
 INSTALLED_APPS = DJANGO_DEFAULT_APPS + DOWNLOADED_APPS + PROJECT_APPS
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080',
+    'http://localhost',
 ]
 
 REST_FRAMEWORK = {
@@ -86,14 +90,29 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.network.wsgi.application'
+
+# DATABASES = {
+#     'default': {
+#         "ENGINE": SQL_ENGINE or "django.db.backends.sqlite3",
+#         "NAME": SQL_DB or DB_DIR / 'db.sqlite3',
+#         "USER": SQL_USER or "user",
+#         "PASSWORD": SQL_PASSWORD or "password",
+#         "HOST": SQL_HOST or "localhost",
+#         "PORT": SQL_PORT or "5432",
+#     }}
+
 DATABASES = {
     'default': {
-        "ENGINE": SQL_ENGINE or "django.db.backends.sqlite3",
-        "NAME": SQL_DB or DB_DIR / 'db.sqlite3',
-        "USER": SQL_USER or "user",
-        "PASSWORD": SQL_PASSWORD or "password",
-        "HOST": SQL_HOST or "localhost",
-        "PORT": SQL_PORT or "5432",
+        "ENGINE": SQL_ENGINE,
+        "NAME": SQL_DB,
+        "USER": SQL_USER,
+        "PASSWORD": SQL_PASSWORD,
+        "HOST": SQL_HOST,
+        "PORT": SQL_PORT,
+    },
+    'sqlite': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DB_DIR / 'db.sqlite3',
     }}
 
 # Password validation

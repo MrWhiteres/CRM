@@ -1,17 +1,20 @@
 <template>
   <v-list-item
-      :prepend-avatar="user.image || 'https://cdn.vuetifyjs.com/images/john.png'"
-      :subtitle="returnUserRole(user.type)"
-      :title="user.full_name"
+    :subtitle="returnUserRole(user.type)"
+    :title="user.full_name"
 
   ></v-list-item>
-
 
   <v-divider></v-divider>
 
   <v-list density="compact" nav>
-    <v-list-item prepend-icon="mdi-view-dashboard" title="Таблица" value="Таблица"/>
-    <v-list-item prepend-icon="mdi-forum" title="Что-то" value="Что-то"/>
+    <v-list-item v-if="['coach', 'head_coach'].includes(user.type)"
+                 prepend-icon="mdi-view-dashboard" title="Таблица"
+                 value="Таблица" @click="this.$router.push({name: 'couch-table'})"/>
+    <v-list-item v-if="['operator', 'admin'].includes(user.type)"
+                 prepend-icon="mdi-view-dashboard" title="Таблица новых клиентов"
+                 value="Таблица новых клиентов" @click="this.$router.push({name: 'client-list'})"/>
+    <v-list-item prepend-icon="mdi-form-select" title="Форма" value="Форма" @click="this.$router.push({name: 'form'})"/>
     <v-list-item prepend-icon="mdi-account" title="Профиль" value="Профиль"
                  @click="this.$router.push({name: 'profile'})"/>
     <v-list-item v-if="user.type === 'admin'" prepend-icon="mdi-account" title="Админ панель"
@@ -50,7 +53,7 @@ export default {
     }
   },
   mounted() {
-    setInterval(()=> {
+    setInterval(() => {
       if (this.user.image !== this.store.state.user.image) {
         this.user = this.store.state.user
       }

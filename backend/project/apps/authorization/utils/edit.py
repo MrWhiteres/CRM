@@ -3,6 +3,7 @@ from re import sub
 from django.http import QueryDict
 
 from ..models import User
+from ...crm.models import AllTime
 
 
 def clear_data(data: QueryDict) -> dict:
@@ -24,7 +25,6 @@ def update_user_data(data: dict, user: User) -> bool:
     if image := data.get('image'):
         if user.profile.image:
             user.profile.image.delete()
-            user.profile.save()
         user.profile.image = image
         flag = True
     if phone_number := data.get('phone_number'):
@@ -33,3 +33,19 @@ def update_user_data(data: dict, user: User) -> bool:
     user.save()
     user.profile.save()
     return flag
+
+
+def get_time() -> list:
+    return recreate_time(get_all_time())
+
+
+def recreate_time(data: QueryDict) -> list:
+    time: AllTime
+    return [dict(
+        value=time.id,
+        title=time.time
+    ) for time in data]
+
+
+def get_all_time() -> QueryDict:
+    return AllTime.objects.all()

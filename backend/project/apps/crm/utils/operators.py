@@ -3,7 +3,7 @@ from ast import literal_eval
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 
-from ..models import Clients, FormClient, OtherData, GroupType, NewClientCoach
+from ..models import Clients, FormClient, OtherData, GroupType, NewClientCoach, CoachForClient
 from ...authorization.models import User, Profile
 
 
@@ -24,10 +24,19 @@ def recreate_client_data(data: QuerySet) -> list:
             date_update=element.date_update,
             crm_status=element.status_operator,
             data=element.date_added,
-            coach=False
+            coach=return_coach(element)
         )
         for element in data
     ]
+
+
+def return_coach(data: Clients) -> list | bool:
+    try:
+        element: CoachForClient
+        return [f"{element.coach.last_name} {element.coach.first_name}" for element in
+                CoachForClient.objects.filter(client=data)]
+    except CoachForClient.DoesNotExist:
+        return False
 
 
 def get_operator_client_status() -> list:
@@ -121,7 +130,6 @@ def add_clients_to_coach(data: dict) -> None:
     clients = data['clients']
     client: dict
     for client in clients:
-        print(client)
         if not client['coach'] or client['crm_status'] == Clients.NOT_CHECK:
             continue
         client_object = Clients.objects.get(id=client['id'])
@@ -141,3 +149,11 @@ def create_temporary_relationship(client: Clients, coach: id) -> None:
         client=client,
         coach=User.objects.get(id=coach)
     ).save()
+
+
+def get_all_clients() -> list:
+    return recreate_client_data(get_all_clients_coach())
+
+
+def get_all_clients_coach() -> QuerySet:
+    return Clients.objects.all().exclude(status=Clients.NEW)

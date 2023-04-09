@@ -16,7 +16,7 @@
             <v-toolbar flat>
               <v-spacer/>
               <v-btn class="text-caption" @click="fetchData" v-text="`Обновить данные`"/>
-              <v-dialog v-model="dialog" max-width="500px">
+              <v-dialog v-model="dialog" max-width="500px" persistent>
                 <template v-slot:activator="{ props }">
                   <v-btn
                     color="black"
@@ -47,6 +47,10 @@
                           <v-select v-model="editedItem.visit_time" :items="timeItems" label="Время тренировки"
                                     variant="underlined"/>
                         </v-col>
+                        <v-col cols="12" md="4" sm="6">
+                          <v-select v-model="editedItem.class_type" :items="class_type" label="Тип тренировки"
+                                    variant="underlined"/>
+                        </v-col>
                       </v-row>
                     </v-container>
                   </v-card-text>
@@ -55,7 +59,7 @@
                     <v-spacer></v-spacer>
                     <v-btn class="text-caption" color="blue-darken-1" variant="text" @click="close">Закрыть</v-btn>
                     <v-btn
-                      :disabled="!Boolean(editedItem.first_name) || !Boolean(editedItem.last_name) || !Boolean(editedItem.phone_number) || !Boolean(editedItem.visit_time) "
+                      :disabled="!Boolean(editedItem.first_name) || !Boolean(editedItem.last_name) || !Boolean(editedItem.phone_number) || !Boolean(editedItem.visit_time) || !Boolean(editedItem.class_type) "
                       class="text-caption"
                       color="blue-darken-1"
                       variant="text" @click="save">Добавить
@@ -74,7 +78,7 @@
           </template>
           <template v-slot:item.full_name="{ item }">
             <v-text-field
-              :value="`${item.value.last_name ? `${item.value.last_name} ${item.value.first_name}` :`${item.props.title.last_name} ${item.props.title.first_name}`}`"
+              :value="`${item.value.last_name ? `${item.value.last_name || ''} ${item.value.first_name}` :` ${item.props.title.first_name}`}`"
               readonly
               variant="underlined"/>
 
@@ -124,7 +128,7 @@
               variant="underlined"/>
           </template>
           <template v-slot:item.payed_status="{ item }">
-            <v-list lines="one">
+            <v-list>
               <v-list-item
                 v-if="Boolean(item.props.title)"
                 style="min-width: 100px"
@@ -187,22 +191,17 @@ export default {
         last_name: "",
         phone_number: "",
         visit_time: "",
+        class_type: ""
       },
-      timeItems: []
+      timeItems: [],
+      class_type: []
     };
-  },
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
   },
   methods: {
     async submitForm() {
       try {
         await axios.post('clients-date/', {clients: this.clients})
+        await this.fetchData()
       } catch (_) {
       }
     },
@@ -223,22 +222,15 @@ export default {
       };
       this.editedIndex = -1;
     },
-    async closeDelete() {
-      this.dialogDelete = false;
-      this.editedItem = {
-        name: "",
-        exist: false,
-        info: "",
-      };
-      this.editedIndex = -1;
-    },
     async fetchData() {
       try {
+        this.clients = []
         const response = await axios.get('clients-date/')
         this.clients = response.data.clients
         this.itemsPerPage = this.clients.length
         this.timeItems = response.data.time
         this.paidStatus = response.data.status_paid
+        this.class_type = response.data.class_type
       } catch (_) {
 
       }
@@ -246,12 +238,6 @@ export default {
   },
   mounted() {
     this.fetchData()
-  },
-  filters: {
-    paidStatusReturn(value) {
-      console.log(value)
-      return value
-    },
   }
 }
 </script>

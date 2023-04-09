@@ -3,10 +3,10 @@
     <v-container>
       <v-card>
         <v-alert
-            v-if="error"
-            dismissible
-            type="error"
-            @click="error = null"
+          v-if="error"
+          dismissible
+          type="error"
+          @click="error = null"
         >
           {{ error }}
         </v-alert>
@@ -16,17 +16,21 @@
             <v-row>
               <v-col>
                 <input-ui v-model="userData.first_name"
-                          label="Ім'я"
+                          label="Имя"
+                          variant="outlined"
                           readonly/>
                 <input-ui v-model="userData.last_name"
-                          label="Прізвище"
+                          label="Фамилия"
+                          variant="outlined"
                           readonly/>
                 <input-ui v-if="userData.phone_number"
                           v-model="userData.phone_number"
-                          label="Номер телефону"
+                          label="Номер телефона"
+                          variant="outlined"
                           readonly/>
                 <input-ui v-else v-model="noneData"
-                          label="Номер телефону"
+                          label="Номер телефона"
+                          variant="outlined"
                           readonly/>
                 <v-img v-if="userData.image"
                        :aspect-ratio="1"
@@ -34,22 +38,24 @@
                        cover
                        width="300"/>
                 <input-ui v-else
+                          variant="outlined"
                           v-model="noneData"
-                          label="Фотокартка"
-                          readonly></input-ui>
+                          label="Фото"
+                          readonly/>
               </v-col>
               <v-col>
                 <input-ui id="first_name"
                           v-model="updatedUserData.first_name"
                           :counter="true"
                           :dense="true"
+                          variant="outlined"
                           :maxlength="50"
                           :outlined="false"
                           :placeholder="'Степан'"
                           :rules="[rules.minLength]"
                           :type="'text'"
                           clearable
-                          label="Ім'я"
+                          label="Имя"
                           prepend-icon="mdi-rename"
                           @change="validateDataChange"
                           @click:clear="validateDataChange"
@@ -57,6 +63,7 @@
                 <input-ui id="last_name"
                           v-model="updatedUserData.last_name"
                           :counter="true"
+                          variant="outlined"
                           :dense="true"
                           :maxlength="50"
                           :outlined="false"
@@ -64,7 +71,7 @@
                           :rules="[rules.minLength]"
                           :type="'text'"
                           clearable
-                          label="Прізвище"
+                          label="Фамилия"
                           prepend-icon="mdi-rename-box-outline"
                           @change="validateDataChange"
                           @click:clear="validateDataChange"
@@ -74,12 +81,13 @@
                           :counter="true"
                           :dense="true"
                           :maxlength="15"
+                          variant="outlined"
                           :outlined="false"
                           :placeholder="'380998877666'"
                           :rules="[rules.isNumber,rules.minLengthNumber]"
                           :type="'text'"
                           clearable
-                          label="Номер телефону"
+                          label="Номер телефона"
                           prepend-icon="mdi-card-account-phone"
                           @change="validateDataChange"
                           @click:clear="validateDataChange"
@@ -89,8 +97,8 @@
                               :rules="[rules.isImage]"
                               :show-size="1000"
                               accept="image/*"
-                              label="Фотокартка"
-                              outlined
+                              label="Фото"
+                              variant="outlined"
                               prepend-icon="mdi-paperclip"
                               @change="validateImageChange($event)"
                               @click:clear="validateImageChange($event)"
@@ -99,16 +107,17 @@
             </v-row>
 
             <v-alert
-                v-if="infoActiv"
-                dense
-                type="info"
+              v-if="infoActiv"
+              dense
+              type="info"
             >
-              Поля форми пусті. Для оновлення свого профілю заповніть пусті поля.
+              Поля незаполненны. Для обновления профиля заполните поля.
             </v-alert>
 
-            <v-btn block @click="router.push({name: 'profile'})">На сторінку профілю</v-btn>
-            <v-btn :disabled="isActiv || isLoading" block color="primary" type="submit">
-              <span v-if="!isLoading">Оновити профіль</span>
+            <v-btn block @click="router.push({name: 'profile'})" class="text-caption">Назад к профилю</v-btn>
+
+            <v-btn :disabled="isActiv || isLoading" class="text-caption" block color="primary" type="submit">
+              <span v-if="!isLoading">Обновить профиль</span>
               <span v-else>
                <v-progress-circular color="#ffffff" indeterminate size="20"/>
             </span>
@@ -120,18 +129,18 @@
     </v-container>
     <v-row justify="center">
       <v-dialog
-          v-model="dialog"
-          persistent
-          width="auto"
+        v-model="dialog"
+        persistent
+        width="auto"
       >
         <v-card>
           <v-card-text>Профиль успешно обновлен.</v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-                color="green-darken-1"
-                variant="text"
-                @click='router.push({name: "profile"})'
+              color="green-darken-1"
+              variant="text"
+              @click='router.push({name: "profile"})'
             >
               Назад в профиль
             </v-btn>
@@ -160,13 +169,13 @@ export default {
       try {
         const response = await axios.get(`user/profile/`)
         if (
-            !(response.data.email === store.state.user.email &&
-                response.data.first_name === store.state.user.first_name &&
-                response.data.last_name === store.state.user.last_name &&
-                response.data.full_name === store.state.user.full_name &&
-                response.data.image === store.state.user.image &&
-                response.data.phone_number === store.state.user.phone_number &&
-                response.data.type === store.state.user.type)
+          !(response.data.email === store.state.user.email &&
+            response.data.first_name === store.state.user.first_name &&
+            response.data.last_name === store.state.user.last_name &&
+            response.data.full_name === store.state.user.full_name &&
+            response.data.image === store.state.user.image &&
+            response.data.phone_number === store.state.user.phone_number &&
+            response.data.type === store.state.user.type)
         ) {
           store.commit('setUser', response.data)
         }
@@ -196,9 +205,11 @@ export default {
         lastName: "",
         phone_number: '',
         image: [],
+        selected_time: [],
       },
+      work_time: [],
       dialog: false,
-      noneData: 'Немає інформації',
+      noneData: 'Нет информации',
       isActiv: true,
       isLoading: false,
       infoActiv: true,
@@ -256,14 +267,14 @@ export default {
     },
     async getDataUpdate() {
       return Boolean(
-          this.updatedUserData.first_name ||
-          this.updatedUserData.last_name ||
-          this.updatedUserData.phone_number ||
-          this.updatedUserData.image.length > 0
+        this.updatedUserData.first_name ||
+        this.updatedUserData.last_name ||
+        this.updatedUserData.phone_number ||
+        this.updatedUserData.image.length > 0
       )
     },
     async validateDataChange() {
-      if (!await this.v$.$invalid && await this.getDataUpdate()) {
+      if (!this.v$.$invalid && await this.getDataUpdate()) {
         await this.activButton()
       } else {
         await this.disableButton()
@@ -320,7 +331,7 @@ export default {
         return false;
       }
     }
-  }
+  },
 }
 </script>
 

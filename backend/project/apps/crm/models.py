@@ -54,7 +54,7 @@ class Clients(Model):
     COACH_STATUS = (
         (RECORDED, 'Записан'),
         (NOT_CHECKED, 'Не проверен'),
-        (NOT_RECORDED, 'Не записан'),
+        (NOT_RECORDED, 'Отказ'),
     )
 
     status = CharField(verbose_name='Статус клиента', choices=CLIENT_STATUS, default=NEW, max_length=255)
@@ -75,11 +75,6 @@ class ClassAttendance(Model):
     visit = BooleanField(default=False)
     client = ForeignKey(Clients, on_delete=DO_NOTHING)
     date = DateField(auto_now_add=True)
-
-
-class WorkTime(Model):
-    coach = ForeignKey(User, verbose_name='Тренер', on_delete=DO_NOTHING)
-    work_time = ForeignKey(AllTime, verbose_name='Рабочие часы', on_delete=DO_NOTHING)
 
 
 class Location(Model):
@@ -125,7 +120,8 @@ class OtherData(Model):
 
 class CoachForClient(Model):
     coach = ForeignKey(User, verbose_name='Тренер', on_delete=DO_NOTHING)
-    visit_time = ForeignKey(WorkTime, verbose_name='Время посещения тренировки с тренером', on_delete=DO_NOTHING)
+    visit_time = CharField(verbose_name='Время посещения тренировки с тренером', max_length=255)
+    group_type = CharField(verbose_name='Тип тренировки', max_length=255)
     client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
 
 

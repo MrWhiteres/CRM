@@ -24,3 +24,5 @@ class FormSerializer(Serializer):
 
 class OperatorCrmClientsSerializer(Serializer):
     clients = ListField(required=True, min_length=1)
+
+

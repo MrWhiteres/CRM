@@ -7,7 +7,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_RE
 from .serializers import TokenUserSerializer, RegistrationUserSerializer, LoginUserSerializer, UserDataSerializer, \
     EditProfileSerializer
 from .utils.auth import confirm_user, registration_user, login_user
-from .utils.edit import clear_data, update_user_data
+from .utils.edit import clear_data, update_user_data, get_time
 from .utils.renderers import renderer_user
 
 
@@ -56,7 +56,6 @@ class ConfirmAPI(RetrieveAPIView):
 
     def post(self, request: Request, *args, **kwargs) -> JsonResponse:
         data = self.serializer_class(data=request.data)
-        print(data)
         if not data.is_valid():
             return JsonResponse(data={}, status=HTTP_400_BAD_REQUEST)
         if confirm_user({**data.validated_data}['token']):
@@ -77,7 +76,6 @@ class UserDataApi(RetrieveAPIView):
             data_serializer = serializer(data=data)
             if data_serializer.is_valid():
                 return {**data_serializer.validated_data}
-            print(data_serializer.errors)
         return False
 
     def get(self, request: Request, *args, **kwargs) -> JsonResponse:
@@ -86,7 +84,7 @@ class UserDataApi(RetrieveAPIView):
 
     def post(self, request: Request, *args, **kwargs) -> JsonResponse:
         data = self.serialize_data(data=clear_data(request.data))
-        update_user = update_user_data(data, request.user)
+        update_user_data(data, request.user)
         return JsonResponse(data={}, status=HTTP_200_OK)
 
 
@@ -98,3 +96,10 @@ class ImageAPI(RetrieveAPIView):
         response = FileResponse(open(image.path, 'rb'))
         response['Content-Disposition'] = f'attachment; filename={image.name}'
         return response
+
+
+class TimeGetAPI(RetrieveAPIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, *args, **kwargs) -> JsonResponse:
+        return JsonResponse(data={'time': get_time()}, status=HTTP_200_OK)

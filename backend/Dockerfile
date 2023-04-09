@@ -1,7 +1,7 @@
 FROM python:3.11-slim-buster
 
 WORKDIR ./backend
-RUN apt update && apt-get install -y postgresql-client make && rm -rf /var/cache/apt
+RUN apt update && apt-get install -y postgresql-client make && apt install -y curl && rm -rf /var/cache/apt
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 

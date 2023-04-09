@@ -13,9 +13,16 @@ services:
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
-      - ${PORTS_DB}
+      - published: 5432
+        target: 5432
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  pgbackups:
+
+  pg-backups:
     container_name: Backup
     image: prodrigestivill/postgres-backup-local
     restart: unless-stopped
@@ -26,7 +33,7 @@ services:
     depends_on:
       - database
     environment:
-      POSTGRES_HOST: db
+      POSTGRES_HOST: database
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -34,7 +41,11 @@ services:
       BACKUP_KEEP_DAYS: 7
       BACKUP_KEEP_WEEKS: 4
       BACKUP_KEEP_MONTHS: 6
-      HEALTHCHECK_PORT: 81
+      HEALTHCHECK_HTTP: "http://localhost:81"
+      HEALTHCHECK_INTERVAL: 30s
+      HEALTHCHECK_TIMEOUT: 10s
+      HEALTHCHECK_RETRIES: 5
+      HEALTHCHECK_START_PERIOD: 0s
 
   django:
     container_name: Django_API
@@ -42,19 +53,17 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile
-    command: >
-      sh -c "
-        python manage.py migrate --noinput &&
-        python manage.py makemigrations --noinput &&
-        python manage.py migrate --noinput &&
-        python manage.py loaddata data/time_data.json &&
-        python manage.py loaddata data/location.json &&
-        python manage.py loaddata data/section.json &&
-        python manage.py loaddata data/days.json &&
-        python manage.py loaddata data/age.json &&
-        python manage.py loaddata data/groups_type.json &&
-        python manage.py collectstatic --noinput &&
-        gunicorn --config project/settings/gunicorn_config.py project.network.wsgi:application --reload --preload
+    command: sh -c "
+      python manage.py makemigrations --noinput &&
+      python manage.py migrate --noinput &&
+      python manage.py loaddata data/time_data.json &&
+      python manage.py loaddata data/location.json &&
+      python manage.py loaddata data/section.json &&
+      python manage.py loaddata data/days.json &&
+      python manage.py loaddata data/age.json &&
+      python manage.py loaddata data/groups_type.json &&
+      python manage.py collectstatic --noinput &&
+      gunicorn --config project/settings/gunicorn_config.py project.network.wsgi:application --reload --preload
       "
     volumes:
       - type: bind
@@ -68,45 +77,69 @@ services:
         target: /media
     depends_on:
       - database
+      - pg-backups
+    links:
+      - database
+      - pg-backups
     ports:
-      - ${DJANGO_PORTS}
+      - published: 8000
+        target: 8000
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'curl -f http://localhost:8000/backend/api/'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  nginx:
-    container_name: Nginx
+
+  #  nginx:
+  #    container_name: Nginx
+  #    restart: unless-stopped
+  #    build:
+  #      context: ./nginx/.
+  #      dockerfile: Dockerfile
+  #    volumes:
+  #      - type: bind
+  #        source: ./backend/static/
+  #        target: /backend/static/
+  #      - type: bind
+  #        source: ./backend/media
+  #        target: /backend/media
+  #    healthcheck:
+  #      test: [ "CMD-SHELL", "sh -c 'curl -f http://localhost:80/backend/api/'" ]
+  #      interval: 30s
+  #      timeout: 10s
+  #      retries: 5
+  #    ports:
+  #      - published: 80
+  #        target: 80
+  #    depends_on:
+  #      - django
+
+
+  vue:
+    build: ./frontend/
+    container_name: Vue
     restart: unless-stopped
-    build:
-      context: ./nginx/.
-      dockerfile: Dockerfile
     volumes:
       - type: bind
-        source: ./backend/static/
-        target: /backend/static/
+        source: ./frontend
+        target: /frontend/
+      - type: bind
+        source: ./backend/static
+        target: /static
       - type: bind
         source: ./backend/media
-        target: /backend/media
+        target: /media
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost/api/ || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     ports:
-      - ${NGINX_PORTS}
+      - published: 80
+        target: 80
     depends_on:
       - django
-
-#  vue:
-#    build: ./frontend/
-#    container_name: Vue
-#    restart: unless-stopped
-#    volumes:
-#      - type: bind
-#        source: ./frontend
-#        target: /frontend/
-#      - type: bind
-#        source: ./backend/static
-#        target: /static
-#      - type: bind
-#        source: ./backend/media
-#        target: /media
-#    ports:
-#      - "8080:80"
-#    depends_on:
-#      - django
 
 
 volumes:

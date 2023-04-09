@@ -3,7 +3,7 @@
     <v-card class="card-base">
       <v-row>
         <v-col cols="3">
-          <v-img :src="user.image || 'https://cdn.vuetifyjs.com/images/john.png'" contain height="200"
+          <v-img :src="user.image || ''" contain height="200"
                  rounded></v-img>
         </v-col>
         <v-col cols="9">
@@ -27,7 +27,7 @@
           </v-card-text>
         </v-col>
       </v-row>
-      <v-card-actions>
+      <v-card-actions style="justify-content: center">
         <v-btn variant="outlined" @click="editProfile">Редактировать профиль</v-btn>
       </v-card-actions>
     </v-card>
@@ -65,7 +65,7 @@ export default {
   methods: {
     async getUserProfile() {
       try {
-        const response = await axios.get('/user/profile')
+        const response = await axios.get(`user/profile/`)
         let image = response.data.image
         if (image) {
           response.data.image = await this.getImage()
@@ -73,6 +73,7 @@ export default {
         this.store.commit('setUser', response.data)
       } catch (error) {
         localStorage.clear()
+        console.log(error)
         this.store.commit('clearState')
         await this.router.push({name: 'auth'})
 

@@ -3,7 +3,8 @@ from datetime import datetime
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from ..models import CoachForClient, Clients, WorkTime, AllTime, ClassAttendance
+from .operators import return_base_data
+from ..models import CoachForClient, Clients, ClassAttendance, NewClientCoach, AllTime, GroupType
 from ...authorization.models import User
 
 
@@ -52,10 +53,15 @@ def mark_visit_creation(data: dict, coach: User) -> None:
             )
             if correct_client.payed_status == 'paid':
                 correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
-            create_relationship(coach=coach, client=correct_client, visit_time=client['visit_time'])
+            create_relationship(coach=coach, client=correct_client, visit_time=client['visit_time'],
+                                group_type=client['class_type'])
             correct_client.status = correct_client.RECORDED
             correct_client.save()
-
+        if correct_client.payed_status == correct_client.NEW_CLIENT:
+            correct_client.payed_status = return_payed_status(client['status'])
+        if correct_client.payed_status == 'paid':
+            correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
+        correct_client.save()
         create_visit(visit=client['exist'], client=correct_client)
 
 
@@ -90,20 +96,125 @@ def return_payed_status(data: str) -> str:
     return Clients.NOTPAID
 
 
-def create_relationship(coach: User, client: Clients, visit_time: str) -> None:
-    new_relationship = CoachForClient.objects.create(
-        coach=coach, client=client,
-        visit_time=return_time_element_coach(coach, visit_time)
+def create_relationship(coach: User, client: Clients, visit_time: str, group_type: str) -> None:
+    try:
+        CoachForClient.objects.get(coach=coach, client=client,
+                                   visit_time=visit_time,
+                                   group_type=group_type)
+    except CoachForClient.DoesNotExist:
+        CoachForClient.objects.create(
+            coach=coach, client=client,
+            visit_time=visit_time,
+            group_type=group_type
+        ).save()
+
+
+def new_clients(coach: User) -> list:
+    return change_choose_data(recreate_client_data(return_clients_list(return_clients(coach))))
+
+
+def change_choose_data(data: list) -> list:
+    element: dict
+    for element in data:
+        element['visit_day'] = element['visit_day'].split(', ')
+        element['visit_time'] = element['visit_time'].split(', ')
+        element['location'] = element['location'].split(', ')
+        element['section'] = element['section'].split(', ')
+        element['class_type'] = [{'title': 'Персональные', 'value': 'single'},
+                                 {'title': 'Групповые', 'value': 'group'}]
+
+    return data
+
+
+def return_clients(coach: User) -> QuerySet:
+    return NewClientCoach.objects.filter(coach=coach)
+
+
+def return_clients_list(data: QuerySet) -> list:
+    element: NewClientCoach
+    return [element.client for element in data]
+
+
+def recreate_client_data(data: list) -> list:
+    element: Clients
+    return [dict(
+        name=element.name,
+        lastname=element.lastname,
+        phone_number=element.phone_number,
+        **return_base_data(element),
+        status=element.status_coach
+    ) for element in data]
+
+
+def create_new_clients_coach(data: dict, coach: User):
+    data = cleared_data(data)
+    clients = return_query_set_clients(data['id_list'])
+    delete_temporary_clients(clients, coach)
+    for client in clients:
+        client: Clients
+        client.payed_status = Clients.NEW_CLIENT
+        client.status_coach = return_correct_data(client, data, 'status')
+        client.save()
+        for element_time in return_correct_data(client, data, 'details'):
+            create_relationship(coach=coach, client=client, visit_time=element_time,
+                                group_type=return_correct_data(client, data, 'class_type'))
+
+
+def return_correct_data(client: Clients, data: dict, key: str) -> str:
+    for element in data['clients']:
+        if element['id'] == client.id:
+            try:
+                return element[key]
+            except KeyError:
+                return [element_inner[key] for element_inner in element['details'] if key in element_inner][0]
+    return [element[key] for element in data['clients'] if element['id'] == client.id][0]
+
+
+def cleared_data(data: dict) -> dict:
+    return dict(
+        clients=[
+            dict(
+                id=element['id'],
+                status=element['status'],
+                details=element['details'],
+            ) for element in data['clients']
+            if len(element['details']) != 0 or element['status'] != Clients.NOT_CHECKED
+        ],
+        id_list=[
+            element['id'] for element in data['clients'] if
+            len(element['details']) != 0 or element['status'] != Clients.NOT_CHECKED
+        ]
     )
-    new_relationship.save()
 
 
-def return_time_element_coach(coach: User, visit_time: str) -> WorkTime:
-    return WorkTime.objects.get(coach=coach, work_time=AllTime.objects.get(time=visit_time))
+def return_query_set_clients(list_id: list) -> list:
+    return Clients.objects.filter(id__in=list_id)
 
 
-def return_work_time_coach(coach: User) -> list:
-    work_time: QuerySet = WorkTime.objects.filter(coach=coach)
-    element: WorkTime
-    return [dict(title=element.work_time.time, value=element.work_time.time) for element in work_time]
+def delete_temporary_clients(clients: list, coach: User) -> None:
+    for element in get_temporary_clients(clients, coach):
+        element.delete()
 
+
+def get_temporary_clients(clients: list, coach: User) -> list:
+    return NewClientCoach.objects.filter(coach=coach, client__in=clients)
+
+
+def return_time() -> list:
+    time: AllTime
+    return [
+        dict(
+            title=time.time,
+            value=time.time
+        ) for time in AllTime.objects.all()
+    ]
+
+
+def return_class_type() -> list:
+    class_type: GroupType
+    return [
+        dict(
+            title=class_type.class_type,
+            value=class_type.key
+        ) for class_type in GroupType.objects.all()
+    ]

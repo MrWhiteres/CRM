@@ -2,11 +2,12 @@ from secrets import token_urlsafe
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager, User
 from django.db.models import (
-    Model, EmailField, BooleanField, CASCADE,
-    OneToOneField, DateTimeField, CharField, ForeignKey,
+    Model, EmailField, BooleanField, DateTimeField, CharField, ForeignKey,
     DO_NOTHING
 )
 from django_resized import ResizedImageField
+
+from project.apps.authorization import path_to_image_profile
 
 
 class UserManager(BaseUserManager):
@@ -38,25 +39,66 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     username = None
-    email = EmailField(verbose_name='Електронная почта',
-                       db_index=True, unique=True)
+    ADMIN = 'admin'
+    USER = 'user'
+    COACH = 'coach'
+    HEAD_COACH = 'head_coach'
+    OPERATOR = 'operator'
+
+    USER_STATUS = (
+        (ADMIN, 'Администратор'),
+        (USER, 'Юзер'),
+        (COACH, 'Тренер'),
+        (HEAD_COACH, 'Старший тренер'),
+        (OPERATOR, 'Оператор'),
+    )
+
+    EMPTY = 'empty'
+    YOGA = 'yoga'
+    MARTIALARTS = 'martialarts'
+    COACH_SECTION = (
+        (EMPTY, 'Отсутствует'),
+        (YOGA, 'Тренер йоги'),
+        (MARTIALARTS, "Тренер единоборств"),
+    )
+
+    email = EmailField(verbose_name='Електронная почта', db_index=True, unique=True)
     email_verify = BooleanField(default=False)
     is_active = BooleanField(default=False, verbose_name='Активный')
+
+    user_type = CharField(
+        verbose_name="Тип профиля", choices=USER_STATUS,
+        default=USER, max_length=20
+    )
+
+    user_group = CharField(
+        verbose_name='Секция тренера', max_length=255, choices=COACH_SECTION,
+        default=EMPTY, blank=True, null=True
+    )
+
+    image = ResizedImageField(
+        verbose_name='Изображение профиля', force_format="WEBP", quality=100,
+        upload_to=path_to_image_profile, blank=True, null=True
+    )
+    phone_number = CharField(
+        verbose_name='Номер телефона', blank=True,
+        null=True, max_length=255
+    )
+
+    create_at = DateTimeField(verbose_name="Дата регистрации", auto_now_add=True, editable=False, )
+    update_at = DateTimeField(verbose_name="Дата последнего обновления", auto_now=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = "Пользователь"
-        verbose_name_plural = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     objects = UserManager()
 
     def __str__(self) -> str:
         return f'{self.email} {self.first_name} {self.last_name}'
-
-    def get_profile(self) -> Model:
-        return Profile.objects.get(user=self)
 
     def generate_confirmation_token(self) -> str:
         token = EmailActivateToken.objects.create(
@@ -78,58 +120,6 @@ class User(AbstractUser):
         self.is_active = True
         EmailActivateToken.objects.get(confirmation_token=token).delete()
         self.save()
-
-
-def path_to_image_profile(instance, filename: str) -> str:
-    return f'users/profile-{instance.user.email}/profile_image{filename[filename.rfind("."):]}'
-
-
-class Profile(Model):
-    ADMIN = 'admin'
-    USER = 'user'
-    COACH = 'coach'
-    HEAD_COACH = 'head_coach'
-    OPERATOR = 'operator'
-
-    USER_STATUS = (
-        (ADMIN, 'Администратор'),
-        (USER, 'Юзер'),
-        (COACH, 'Тренер'),
-        (HEAD_COACH, 'Старший тренер'),
-        (OPERATOR, 'Оператор'),
-    )
-
-    YOGA = 'yoga'
-    MARTIALARTS = 'martialArts'
-    SECTION = (
-        (YOGA, 'йога'),
-        (MARTIALARTS, "единоборства")
-    )
-    user = OneToOneField(User, on_delete=CASCADE, db_index=True)
-    type_section = CharField(verbose_name='Тип секции', max_length=255, choices=SECTION, default=None, blank=True,
-                             null=True)
-    type = CharField(
-        verbose_name="Тип профиля",
-        choices=USER_STATUS,
-        default=USER,
-        max_length=20, )
-    create_at = DateTimeField(
-        verbose_name="Дата регистрации", auto_now_add=True,
-        editable=False,
-    )
-    update_at = DateTimeField(
-        verbose_name="Дата последнего обновления", auto_now=True)
-    image = ResizedImageField(verbose_name='Изображение профиля', force_format="WEBP", quality=100,
-                              upload_to=path_to_image_profile, blank=True, null=True)
-    phone_number = CharField(
-        verbose_name='Номер телефона', blank=True, null=True, max_length=255)
-
-    class Meta:
-        verbose_name = "Профиль пользователя"
-        verbose_name_plural = "Профиль пользователя"
-
-    def __str__(self) -> str:
-        return f'Profile - {self.user}'
 
 
 class EmailActivateToken(Model):

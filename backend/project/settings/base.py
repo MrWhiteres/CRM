@@ -150,7 +150,7 @@ for folder in FOLDERS_FOR_CREATE:
     if not exists(f'{GENERAL_DIR}/{folder}'):
         mkdir(f'{GENERAL_DIR}/{folder}')
 
-LANGUAGE_CODE = 'UK'
+LANGUAGE_CODE = 'RU'
 
 TIME_ZONE = 'Europe/Kiev'
 

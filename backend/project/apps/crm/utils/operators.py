@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from django.forms import model_to_dict
 
 from ..models import Clients, FormClient, OtherData, GroupType, NewClientCoach, CoachForClient
-from ...authorization.models import User, Profile
+from ...authorization.models import User
 
 
 def get_all_new_clients() -> list:
@@ -54,7 +54,7 @@ def get_all_coach() -> list:
         dict(
             title=f'{element.last_name} {element.first_name}',
             value=element.id
-        ) for element in User.objects.filter(profile__type__in=[Profile.COACH, Profile.HEAD_COACH])
+        ) for element in User.objects.filter(user_type=[User.COACH, User.HEAD_COACH])
     ] + [dict(
         title='Не выбран',
         value=False

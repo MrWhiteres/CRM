@@ -6,7 +6,7 @@ from requests import get
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from . import pattern_dict
-from ..models import User, Profile
+from ..models import User
 from ....settings.config_data import URL_FRONTEND
 
 
@@ -64,8 +64,6 @@ def registration_user(data: dict) -> dict or bool:
         user = User.objects.create_user(**generate_user_data(data=data, token=True))
     else:
         user = User.objects.create_user(**generate_user_data(data=data))
-    profile = Profile.objects.create(user=user)
-    profile.save()
     return send_confirm_email(user)
 
 

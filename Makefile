@@ -5,7 +5,7 @@ back:
 	cd backend; . venv/Scripts/activate; python manage.py runserver
 
 dock:
-	docker-compose up --build -d
+	docker-compose up --build -d --force-recreate --no-deps
 
 stop:
 	docker-compose down ; docker image prune -f

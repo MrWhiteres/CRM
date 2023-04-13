@@ -8,5 +8,5 @@ class AuthorizationConfig(AppConfig):
     verbose_name = "Регистрация и авторизация"
 
     def ready(self):
-        from .signals import delete_user, create_user_profile
-        _ = [delete_user, create_user_profile]
+        from .signals import update_model
+        _ = [update_model]

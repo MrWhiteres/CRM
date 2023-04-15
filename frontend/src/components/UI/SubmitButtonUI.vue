@@ -1,5 +1,5 @@
 <template>
-  <v-btn :text="textButton" type="submit">
+  <v-btn :text="textButton" variant="outlined"  type="submit">
   </v-btn>
 </template>
 

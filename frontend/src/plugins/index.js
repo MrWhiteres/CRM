@@ -18,7 +18,7 @@ moment.locale("ru", ru)
 const gauthOption = {
   clientId: import.meta.env.VITE_GOOGLE_KEY
 }
-axios.defaults.baseURL = 'http://localhost/backend/api//'
+axios.defaults.baseURL = 'http://localhost:8000/backend/api/'
 // axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 // axios.defaults.headers.common['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept';
 

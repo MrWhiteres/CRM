@@ -1,72 +1,73 @@
 <template>
-  <v-alert
+  <v-container>
+    <v-alert
       v-if="error"
       :title="errorTitle"
       dismissible
       type="error"
       variant="tonal"
+      style="min-width: 100%"
       @click="error = null"
-  >
-    {{ error }}
-  </v-alert>
-  <v-form @submit.prevent="submitForm">
-    <v-container class="container" fluid>
-      <v-col>
-        <input-ui
-            v-model="formData.email"
-            :counter="true"
-            :dense="true"
-            :label="'Email'"
-            :maxlength="50"
-            :minlength="5"
-            :outlined="false"
-            :placeholder="'your.best.email@example.com'"
-            :rules="[rules.requiredField, rules.email, rules.minLengthEmail]"
-            :type="'email'"
-            clearable
-        />
-        <input-ui
-            v-model="formData.password"
-            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            :counter="true"
-            :dense="true"
-            :label="'Password'"
-            :maxlength="50"
-            :minlength="8"
-            :outlined="false"
-            :rules="[rules.requiredField, rules.minLengthPassword, rules.password]"
-            :type="showPassword ? 'text' : 'password'"
-            :value="formData.password"
-            clearable
-            @click:append="showPassword = !showPassword"
-        />
-      </v-col>
+    >
+      {{ error }}
+    </v-alert>
+  </v-container>
+  <v-form fast-fail @submit.prevent="submitForm">
+    <v-sheet rounded>
+      <v-text-field
+        v-model="formData.email"
+        prepend-icon="mdi-email"
+        :dense="true"
+        label="Почта:"
+        :outlined="false"
+        variant="outlined"
+        :placeholder="'your.best.email@example.com'"
+        :rules="[rules.requiredField, rules.email, rules.minLengthEmail]"
+        :type="'email'"
+        clearable
+      />
+      <v-text-field
+        v-model="formData.password"
+        prepend-icon="mdi-lock"
+        :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :dense="true"
+        label='Пароль:'
+        variant="outlined"
+        :rules="[rules.requiredField, rules.englishLettersOnly,  rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex]"
+        :type="showPassword ? 'text' : 'password'"
+        :value="formData.password"
+        clearable
+        @click:append-inner="showPassword = !showPassword"
+      />
+    </v-sheet>
+    <v-divider
+      class="border-opacity-100"
+    />
+    <v-container>
+      <submit-button-ui class="text-caption" :disabled="loading" :loading="loading" color="primary"
+                        v-text="'Подтвердить'"/>
     </v-container>
-    <div class="input-wrapper">
-      <div class="submit-button-wrapper">
-        <submit-button-ui :disabled="loading" :loading="loading"
-                          v-text="'Submit'"/>
-      </div>
-    </div>
-    <div class="divider-wrapper">
-      <hr class="divider"/>
-      <span class="divider-text">OR</span>
-      <hr class="divider"/>
+    <div class="d-flex justify-content-center align-items-center">
+      <v-divider class="border-opacity-100" style="margin-top: 10px"/>
+      <span style="margin-left: 10px; margin-right: 10px">Или</span>
+      <v-divider class="border-opacity-100" style="margin-top: 10px"/>
     </div>
     <div class="google-auth-wrapper">
       <google-auth @login-failed="handleLoginFailed" @login-successful="handleLoginSuccessful"/>
     </div>
   </v-form>
+
+
 </template>
 
 <script>
-
 import {email, minLength, required} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
 import axios from "axios";
 import {mapMutations, useStore} from "vuex";
 import {useRouter} from "vue-router";
 import GoogleAuth from "@/components/GoogleAuth.vue";
+import SubmitButtonUi from "@/components/UI/SubmitButtonUI.vue";
 
 const emailPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 const passwordPattern = /^\S*(?=\S{8,})(?=\S*\d)(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[!@#$%^&*? ])\S*$/
@@ -76,20 +77,17 @@ const emailValidate = (value) => {
 const passwordValidate = (value) => {
   return passwordPattern.test(value)
 }
-
 export default {
   name: "LoginView",
-  components: {GoogleAuth},
+  components: {SubmitButtonUi, GoogleAuth},
   setup() {
     const store = useStore();
     const router = useRouter();
-
     setInterval(() => {
       if (store.state.user && router.currentRoute.value.fullPath === '/auth') {
         router.push({name: 'profile'})
       }
     })
-
     return {
       v$: useVuelidate(),
       MutationCommand: mapMutations(['clearState']),
@@ -105,19 +103,36 @@ export default {
       },
       showPassword: false,
       rules: {
-        requiredField: value => !!value || 'Required.',
+        requiredField: value => !!value || 'Обязательное поле.',
         email: value => {
-          return emailPattern.test(value) || 'Invalid e-mail.'
+          return emailPattern.test(value) || 'Невалидная почта.'
         },
         minLengthEmail: value => {
-          return value.length >= 5 || 'Min length email 5 symbols'
+          return value.length >= 5 || 'Минимальная длинна почты 5 символов.'
         },
         minLengthPassword: value => {
-          return value.length >= 8 || 'Min length password 8 symbols'
+          return value.length >= 8 || 'Минимальная длинна пароля 8 символов.'
         },
-        password: value => {
-          return passwordPattern.test(value) || 'Invalid password'
-        }
+        uppercaseRegex: value => {
+          const uppercaseRegex = /[A-Z]+/
+          return uppercaseRegex.test(value) || 'Пароль должен содержать хотя бы одну букву верхнего регистра.'
+        },
+        englishLettersOnly: value => {
+          const englishLettersOnlyRegex = /^[a-zA-Z]+$/
+          return englishLettersOnlyRegex.test(value) || 'Пароль должен содержать только буквы английского алфавита.'
+        },
+        lowercaseRegex: value => {
+          const lowercaseRegex = /[a-z]+/
+          return lowercaseRegex.test(value) || 'Пароль должен содержать хотя бы одну букву нижнего регистра.'
+        },
+        numberRegex: value => {
+          const numberRegex = /[0-9]+/
+          return numberRegex.test(value) || 'Пароль должен содержать хотя бы одну цифру.'
+        },
+        specialCharRegex: value => {
+          const specialCharRegex = /[^A-Za-z0-9]+/
+          return specialCharRegex.test(value) || 'Пароль должен содержать хотя бы один специальный символ.'
+        },
       },
       loading: false,
       error: null,
@@ -191,52 +206,13 @@ export default {
         }
       }
       this.loading = false
-
     },
   },
 }
 </script>
 
 <style scoped>
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 100%;
-  position: relative;
-}
 
-.input-wrapper {
-  min-width: 90%;
-  margin-bottom: 1.5rem;
-}
-
-.submit-button-wrapper {
-  z-index: 2;
-  text-align: center;
-}
-
-
-.divider-wrapper {
-  display: flex;
-  align-items: center;
-  margin: 0.5rem 0;
-}
-
-.divider {
-  flex: 1;
-  margin: 0 0.25rem;
-  min-width: 150px;
-}
-
-.divider-text {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-}
 
 .google-auth-wrapper {
   z-index: 1;
@@ -245,10 +221,6 @@ form {
   margin-top: 1.5rem;
 }
 
-.custom-loader {
-  animation: loader 1s infinite;
-  display: flex;
-}
 
 @-moz-keyframes loader {
   from {

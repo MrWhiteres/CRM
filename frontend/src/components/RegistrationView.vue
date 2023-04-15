@@ -1,109 +1,111 @@
 <template>
-  <v-alert
+  <v-container >
+    <v-alert
       v-if="error"
       :title="errorTitle"
       dismissible
       type="error"
       variant="tonal"
+      style="min-width: 100%"
       @click="error = null"
-  >
-    {{ error }}
-  </v-alert>
-  <v-alert
+    >
+      {{ error }}
+    </v-alert>
+    <v-alert
       v-if="success"
       :title="successTitle"
       dismissible
       type="success"
       variant="tonal"
+      style="min-width: 100%"
       @click="success = null"
-  ></v-alert>
-  <v-form @submit.prevent="submitForm">
-    <v-container class="registrationPage" fluid>
-      <v-col class="registrationPage">
-        <input-ui
-            v-model="formData.first_name"
-            :counter="true"
-            :dense="true"
-            :label="'First Name'"
-            :maxlength="50"
-            :minlength="5"
-            :outlined="false"
-            :placeholder="'Stepan'"
-            :rules="[rules.requiredField, rules.minLengthUsername]"
-            :type="'text'"
-            clearable
-        />
-        <input-ui
-            v-model="formData.last_name"
-            :counter="true"
-            :dense="true"
-            :label="'Last name'"
-            :maxlength="50"
-            :minlength="5"
-            :outlined="false"
-            :placeholder="'Bandera'"
-            :rules="[rules.requiredField, rules.minLengthUsername]"
-            :type="'text'"
-            clearable
-        />
-        <input-ui
-            v-model="formData.email"
-            :counter="true"
-            :dense="true"
-            :label="'Email'"
-            :maxlength="50"
-            :minlength="5"
-            :outlined="false"
-            :placeholder="'your.best.email@example.com'"
-            :rules="[rules.requiredField, rules.minLengthEmail, rules.email]"
-            :type="'email'"
-            clearable
-        />
-        <input-ui
-            v-model="formData.password"
-            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            :counter="true"
-            :dense="true"
-            :label="'Password'"
-            :maxlength="50"
-            :minlength="8"
-            :outlined="false"
-            :rules="[rules.requiredField, rules.password, rules.minLengthPassword]"
-            :type="showPassword ? 'text' : 'password'"
-            :value="formData.password"
-            clearable
-            @click:append="showPassword = !showPassword"
-        />
-        <input-ui
-            v-model="formData.confirm_password"
-            :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            :counter="true"
-            :dense="true"
-            :label="'Confirm Password'"
-            :maxlength="50"
-            :minlength="8"
-            :outlined="false"
-            :rules="[rules.requiredField, rules.password, rules.minLengthPassword,rules.passwordConfirmEqual]"
-            :type="showConfirmPassword ? 'text' : 'password'"
-            :value="formData.confirm_password"
-            clearable
-            @click:append="showConfirmPassword = !showConfirmPassword"
-        />
-      </v-col>
+    ></v-alert>
+  </v-container>
+  <v-form fast-fail @submit.prevent="submitForm">
+    <v-sheet rounded>
+      <v-text-field
+        v-model="formData.first_name"
+        :dense="true"
+        :label="'Имя:'"
+        prepend-icon="mdi-account-outline"
+        :maxlength="50"
+        :minlength="5"
+        variant="outlined"
+        :placeholder="'Stepan'"
+        :rules="[rules.requiredField, rules.minLengthUsername]"
+        :type="'text'"
+        clearable
+      />
+      <v-text-field
+        v-model="formData.last_name"
+        :counter="true"
+        :dense="true"
+        :label="'Фамилия:'"
+        prepend-icon="mdi-account"
+        :maxlength="50"
+        :minlength="5"
+        variant="outlined"
+        :placeholder="'Bandera'"
+        :rules="[rules.requiredField, rules.minLengthUsername]"
+        :type="'text'"
+        clearable
+      />
+      <v-text-field
+        v-model="formData.email"
+        :dense="true"
+        :label="'Почта:'"
+        :maxlength="50"
+        :minlength="5"
+        variant="outlined"
+        prepend-icon="mdi-email"
+        :placeholder="'your.best.email@example.com'"
+        :rules="[rules.requiredField, rules.minLengthEmail, rules.email]"
+        :type="'email'"
+        clearable
+      />
+      <v-text-field
+        v-model="formData.password"
+        :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :counter="true"
+        :dense="true"
+        :label="'Пароль:'"
+        :maxlength="50"
+        :minlength="8"
+        variant="outlined"
+        prepend-icon="mdi-lock-outline"
+        :rules="[rules.requiredField, rules.englishLettersOnly, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex]"
+        :type="showPassword ? 'text' : 'password'"
+        :value="formData.password"
+        clearable
+        @click:append-inner="showPassword = !showPassword"
+      />
+      <v-text-field
+        v-model="formData.confirm_password"
+        :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :dense="true"
+        :label="'Подтверждение пароля:'"
+        :maxlength="50"
+        :minlength="8"
+        variant="outlined"
+        prepend-icon="mdi-lock"
+        :rules="[rules.requiredField, rules.englishLettersOnly, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex, rules.passwordConfirmEqual]"
+        :type="showConfirmPassword ? 'text' : 'password'"
+        :value="formData.confirm_password"
+        clearable
+        @click:append-inner="showConfirmPassword = !showConfirmPassword"
+      />
+    </v-sheet>
+    <v-divider
+      class="border-opacity-100"
+    />
+    <v-container>
+      <submit-button-ui class="text-caption" :disabled="loading" :loading="loading" color="primary"
+                        v-text="'Подтвердить'"/>
     </v-container>
-    <div class="input-wrapper">
-
-    </div>
-
-    <div class="input-wrapper">
-      <div class="submit-button-wrapper">
-        <submit-button-ui :disabled="loading" :loading="loading" v-text="'Submit'"/>
-      </div>
-    </div>
-    <div class="divider-wrapper">
-      <hr class="divider"/>
-      <span class="divider-text">OR</span>
-      <hr class="divider"/>
+    <div class="d-flex justify-content-center align-items-center">
+      <v-divider class="border-opacity-100" style="margin-top: 10px"/>
+      <span style="margin-left: 10px; margin-right: 10px">Или</span>
+      <v-divider class="border-opacity-100" style="margin-top: 10px"/>
     </div>
     <div class="google-reg-wrapper">
       <google-registration @registration-failed="handleRegistrationFailed"
@@ -118,6 +120,7 @@ import {useVuelidate} from "@vuelidate/core";
 import axios from "axios";
 import {useRouter} from "vue-router";
 import GoogleRegistration from "@/components/GoogleRegistration.vue";
+import SubmitButtonUi from "@/components/UI/SubmitButtonUI.vue";
 
 const emailPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
 const passwordPattern = /^\S*(?=\S{8,})(?=\S*\d)(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[!@#$%^&*? ])\S*$/
@@ -130,7 +133,7 @@ const passwordValidate = (value) => {
 
 export default {
   name: "RegistrationView",
-  components: {GoogleRegistration},
+  components: {SubmitButtonUi, GoogleRegistration},
   setup() {
     const v$ = useVuelidate()
     const router$ = useRouter()
@@ -156,25 +159,42 @@ export default {
       showPassword: false,
       showConfirmPassword: false,
       rules: {
-        requiredField: value => !!value || 'Required.',
+        requiredField: value => !!value || 'Обязательное поле.',
         email: value => {
-          return emailPattern.test(value) || 'Invalid e-mail.'
+          return emailPattern.test(value) || 'Невалидная почта.'
         },
         minLengthUsername: value => {
-          return value.length >= 5 || 'Too short.'
+          return value.length >= 5 || 'Минимальная длинна поля.'
         },
         minLengthEmail: value => {
-          return value.length >= 5 || 'Min length email 5 symbols'
+          return value.length >= 5 || 'Минимальная длинна почты 5 символов.'
+        },
+        englishLettersOnly: value => {
+          const englishLettersOnlyRegex = /^[a-zA-Z]+$/
+          return englishLettersOnlyRegex.test(value) || 'Пароль должен содержать только буквы английского алфавита.'
         },
         minLengthPassword: value => {
-          return value.length >= 8 || 'Min length password 8 symbols'
+          return value.length >= 8 || 'Минимальная длинна пароля 8 символов.'
         },
-        password: value => {
-          return passwordPattern.test(value) || 'Invalid password'
+        uppercaseRegex: value => {
+          const uppercaseRegex = /[A-Z]+/
+          return uppercaseRegex.test(value) || 'Пароль должен содержать хотя бы одну букву верхнего регистра.'
+        },
+        lowercaseRegex: value => {
+          const lowercaseRegex = /[a-z]+/
+          return lowercaseRegex.test(value) || 'Пароль должен содержать хотя бы одну букву нижнего регистра.'
+        },
+        numberRegex: value => {
+          const numberRegex = /[0-9]+/
+          return numberRegex.test(value) || 'Пароль должен содержать хотя бы одну цифру.'
+        },
+        specialCharRegex: value => {
+          const specialCharRegex = /[^A-Za-z0-9]+/
+          return specialCharRegex.test(value) || 'Пароль должен содержать хотя бы один специальный символ.'
         },
         passwordConfirmEqual: value => {
           if (this.formData.password) {
-            return this.formData.password === value || 'Invalid confirm password'
+            return this.formData.password === value || 'Пароли не совпадают.'
           }
         }
       },
@@ -282,14 +302,6 @@ export default {
 </script>
 
 <style scoped>
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 100%;
-  position: relative;
-}
 
 .input-wrapper {
   min-width: 90%;

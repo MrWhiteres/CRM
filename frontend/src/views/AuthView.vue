@@ -1,74 +1,60 @@
 <template>
-  <v-card class="mx-auto card-header">
-    <v-card-title class="text-center">Авторизация</v-card-title>
+  <v-card rounded elevation="15" class="v-card">
+    <v-card-title class="text-center">{{ showLogin ? 'Авторизация' : 'Регистрация' }}</v-card-title>
     <v-card-text>
-      <v-container>
-        <v-row class="container-body">
-          <v-col v-if="showLogin">
-            <login-view/>
-          </v-col>
-          <v-col v-else cols="12">
-            <registration-view/>
-          </v-col>
-        </v-row>
-      </v-container>
+
+      <v-sheet border rounded class="v-sheet-form">
+        <login-view v-if="showLogin"/>
+        <registration-view v-else/>
+      </v-sheet>
+
     </v-card-text>
-    <v-card-actions class="justify-center">
-      <v-btn text @click="showLogin = !showLogin">
-        {{ showLogin ? 'Зарегистрироваться' : 'Войти' }}
-      </v-btn>
+    <v-card-actions class="justify-center text-center" style="margin-bottom: 20px">
+      <v-card-text>
+        {{ showLogin ? 'Нет аккаунта?' : 'Есть аккаунт?' }}
+        <v-btn class="text-caption" variant="tonal" @click="toggleLogin">
+          {{ showLogin ? 'Зарегистрироваться' : 'Войти' }}
+        </v-btn>
+      </v-card-text>
     </v-card-actions>
   </v-card>
 </template>
 
-<script>
+<script setup>
+import {useStore} from 'vuex'
+import {useRouter} from 'vue-router'
+import LoginView from '@/components/LoginView.vue'
+import RegistrationView from '@/components/RegistrationView.vue'
+import {ref} from "vue";
 
-import {useStore} from "vuex";
-import {useRouter} from "vue-router";
-import LoginView from "@/components/LoginView.vue";
-import RegistrationView from "@/components/RegistrationView.vue";
+const store = useStore()
+const router = useRouter()
+const showLogin = ref(true)
 
-export default {
-  name: 'Auth',
-  components: {RegistrationView, LoginView},
-  setup() {
-    return {
-      store: useStore(),
-      router: useRouter()
-    }
-  },
-  data() {
-    return {
-      showLogin: true,
-    };
-  },
-  mounted() {
-    if (this.store.state.user) {
-      this.router.push({name: 'profile'});
+function toggleLogin() {
+  showLogin.value = !showLogin.value
+}
 
-    }
-  }
-};
+if (store.state.user) {
+  router.push({name: 'profile'})
+}
 </script>
 
-<style>
-.card-header {
-  margin-top: 5%;
-  max-width: 40%;
-  margin-left: 30%;
-  margin-right: 30%;
+
+<style scoped>
+.v-card {
+  margin-top: 2%;
+  margin-bottom: 20px;
+  min-width: 100%;
 }
-@media (max-width: 1100px) {
-  .card-header {
-    max-width: 60%;
+
+@media screen and (min-width: 800px) {
+  .v-card {
+    min-width: 30%;
   }
 }
 
-
-@media (max-width: 767px) {
-  .card-header {
-    max-width: 80%;
-  }
+.v-sheet-form {
+  padding: 10px;
 }
-
 </style>

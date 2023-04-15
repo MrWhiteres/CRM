@@ -1,8 +1,7 @@
 <template>
   <v-responsive>
-    <v-app>
+    <v-app app>
       <div>
-
         <div v-if="loading" class="loader-container">
           <div class="loader-inner">
             <v-progress-circular :size="64" :width="7" color="primary" indeterminate></v-progress-circular>
@@ -18,15 +17,19 @@
             app
             temporary
           >
-            <left-menu-auth v-if="store.state.user"/>
-            <left-menu-base v-else/>
-            <template v-if="store.state.user" v-slot:append>
+            <div v-if="store.state.user">
+              <left-menu-auth/>
+            </div>
+            <div v-else>
+              <left-menu-base/>
+            </div>
+            <div v-if="store.state.user">
               <div class="pa-2">
                 <v-btn block @click="logout">
-                  Logout
+                  Выход
                 </v-btn>
               </div>
-            </template>
+            </div>
           </v-navigation-drawer>
           <v-main>
             <v-responsive>
@@ -92,8 +95,6 @@ export default {
     watchEffect(() => {
       axios.defaults.headers['Authorization'] = store.state.access.length ? `Bearer ${store.state.access}` : ''
     });
-
-
     const getUserProfile = async () => {
       axios.defaults.headers['Authorization'] = `Bearer ${store.state.access}`
       try {
@@ -151,16 +152,20 @@ export default {
       }
     }, 59_000)
 
-    const loading = ref(true)
-
-    setTimeout(() => {
-      loading.value = false
-    }, 2000)
     const logout = async () => {
       localStorage.clear();
       store.commit('clearState')
       await router.push({name: 'auth'});
     }
+    const loading = ref(true) // set the loading initially to true
+
+    const initLoadingTimeout = () => {
+      setTimeout(() => {
+        loading.value = false
+      }, 2000)
+    }
+
+    initLoadingTimeout()
     return {
       loading,
       height,
@@ -176,22 +181,16 @@ export default {
     }
   },
 }
+
 </script>
 
 <style>
 .v-container {
-  min-width: 80%;
-  max-width: 80%;
-  width: 80%;
+  display: grid;
+  place-items: center;
 }
 
-@media screen and (max-width: 767px) {
-  .v-container {
-    min-width: 100%;
-    max-width: 100%;
-    width: 100%;
-  }
-}
+
 
 .loader-container {
   position: fixed;

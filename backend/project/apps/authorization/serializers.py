@@ -8,10 +8,10 @@ class TokenUserSerializer(Serializer):
 
 class RegistrationUserSerializer(Serializer):
     email = EmailField(required=True, min_length=5, max_length=50)
-    password = CharField(required=True, min_length=8, max_length=50)
-    confirm_password = CharField(required=True, min_length=8, max_length=50)
-    first_name = CharField(required=True, min_length=5, max_length=50)
-    last_name = CharField(required=True, min_length=5, max_length=50)
+    password = CharField(required=True, max_length=50)
+    confirm_password = CharField(required=True, max_length=50)
+    first_name = CharField(required=True, max_length=50)
+    last_name = CharField(required=True, max_length=50)
 
 
 class LoginUserSerializer(Serializer):

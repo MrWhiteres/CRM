@@ -1,9 +1,8 @@
 <template>
   <v-list-item
-    :subtitle="returnUserRole(user.type)"
+    :subtitle="user.type"
     :title="user.full_name"
-
-  ></v-list-item>
+  />
 
   <v-divider></v-divider>
 
@@ -44,20 +43,8 @@ import {useStore} from "vuex";
 export default {
   name: "LeftMenuAuth",
   setup() {
-    const returnUserRole = (type) => {
-      const userRole = {
-        'admin': 'Администратор',
-        'user': 'Пользователь',
-        'coach': 'Тренер',
-        'head_coach': 'Старший тренер',
-        'operator': 'Оператор'
-      }
-      return userRole[type]
-    }
-
     return {
       store: useStore(),
-      returnUserRole
     }
   }
   ,

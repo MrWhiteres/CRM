@@ -3,7 +3,7 @@ from secrets import token_urlsafe
 from django.contrib.auth.models import AbstractUser, BaseUserManager, User
 from django.db.models import (
     Model, EmailField, BooleanField, DateTimeField, CharField, ForeignKey,
-    DO_NOTHING
+    DO_NOTHING, CASCADE
 )
 from django_resized import ResizedImageField
 
@@ -47,7 +47,7 @@ class User(AbstractUser):
 
     USER_STATUS = (
         (ADMIN, 'Администратор'),
-        (USER, 'Юзер'),
+        (USER, 'Пользователь'),
         (COACH, 'Тренер'),
         (HEAD_COACH, 'Старший тренер'),
         (OPERATOR, 'Оператор'),
@@ -109,9 +109,8 @@ class User(AbstractUser):
     @staticmethod
     def get_by_confirmation_token(token) -> User or None:
         try:
-            user = EmailActivateToken.objects.get(
+            return EmailActivateToken.objects.get(
                 confirmation_token=token).user
-            return user
         except EmailActivateToken.DoesNotExist:
             return None
 
@@ -123,7 +122,7 @@ class User(AbstractUser):
 
 
 class EmailActivateToken(Model):
-    user = ForeignKey(User, on_delete=DO_NOTHING)
+    user = ForeignKey(User, on_delete=CASCADE)
     confirmation_token = CharField(
         verbose_name='Токен', null=True, blank=True, max_length=255)
 

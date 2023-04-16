@@ -1,5 +1,5 @@
 <template>
-  <v-container >
+  <v-container>
     <v-alert
       v-if="error"
       :title="errorTitle"
@@ -73,7 +73,7 @@
         :minlength="8"
         variant="outlined"
         prepend-icon="mdi-lock-outline"
-        :rules="[rules.requiredField, rules.englishLettersOnly, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex]"
+        :rules="[rules.requiredField, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex, rules.englishLettersOnly]"
         :type="showPassword ? 'text' : 'password'"
         :value="formData.password"
         clearable
@@ -88,7 +88,7 @@
         :minlength="8"
         variant="outlined"
         prepend-icon="mdi-lock"
-        :rules="[rules.requiredField, rules.englishLettersOnly, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex, rules.passwordConfirmEqual]"
+        :rules="[rules.requiredField, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex, rules.passwordConfirmEqual, rules.englishLettersOnly]"
         :type="showConfirmPassword ? 'text' : 'password'"
         :value="formData.confirm_password"
         clearable
@@ -123,7 +123,9 @@ import GoogleRegistration from "@/components/GoogleRegistration.vue";
 import SubmitButtonUi from "@/components/UI/SubmitButtonUI.vue";
 
 const emailPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
-const passwordPattern = /^\S*(?=\S{8,})(?=\S*\d)(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[!@#$%^&*? ])\S*$/
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*? ])[a-zA-Z0-9!@#$%^&*? ]{8,}$/
+
+
 const emailValidate = (value) => {
   return emailPattern.test(value)
 }
@@ -164,13 +166,13 @@ export default {
           return emailPattern.test(value) || 'Невалидная почта.'
         },
         minLengthUsername: value => {
-          return value.length >= 5 || 'Минимальная длинна поля.'
+          return value.length >= 3 || 'Минимальная длинна поля 3 символов.'
         },
         minLengthEmail: value => {
           return value.length >= 5 || 'Минимальная длинна почты 5 символов.'
         },
         englishLettersOnly: value => {
-          const englishLettersOnlyRegex = /^[a-zA-Z]+$/
+          const englishLettersOnlyRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};:\\|,.<>/?]+$/
           return englishLettersOnlyRegex.test(value) || 'Пароль должен содержать только буквы английского алфавита.'
         },
         minLengthPassword: value => {

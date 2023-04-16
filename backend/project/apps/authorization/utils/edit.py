@@ -23,15 +23,14 @@ def update_user_data(data: dict, user: User) -> bool:
         user.last_name = last_name
         flag = True
     if image := data.get('image'):
-        if user.profile.image:
-            user.profile.image.delete()
-        user.profile.image = image
+        if user.image:
+            user.image.delete()
+        user.image = image
         flag = True
     if phone_number := data.get('phone_number'):
-        user.profile.phone_number = phone_number
+        user.phone_number = phone_number
         flag = True
     user.save()
-    user.profile.save()
     return flag
 
 

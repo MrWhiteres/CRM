@@ -1,6 +1,6 @@
 <template>
   <v-responsive>
-    <v-app app>
+    <v-app>
       <div>
         <div v-if="loading" class="loader-container">
           <div class="loader-inner">

@@ -1,32 +1,32 @@
-import { createStore } from 'vuex'
+import {createStore} from 'vuex'
 
 export default createStore({
-    state: {
-        access: "",
-        refresh: "",
-        user: ""
+  state: {
+    access: "",
+    refresh: "",
+    user: "",
+  },
+  getters: {},
+  mutations: {
+    clearState(state) {
+      state.access = ""
+      state.refresh = ""
+      state.user = ""
     },
-    getters: {},
-    mutations: {
-        clearState(state) {
-            state.access = ""
-            state.refresh = ""
-            state.user = ""
-        },
-        setAccess(state, access) {
-            state.access = access
-        },
-        setRefresh(state, refresh) {
-            state.refresh = refresh
-        },
-        setUser(state, user) {
-            state.user = user
-        },
+    setAccess(state, access) {
+      state.access = access
     },
-    actions: {
-        initializeStore() {
-            this.state.refresh = localStorage.getItem("refresh") ? localStorage.getItem("refresh") : ''
-        },
+    setRefresh(state, refresh) {
+      state.refresh = refresh
     },
-    modules: {}
+    setUser(state, user) {
+      state.user = user
+    },
+  },
+  actions: {
+    initializeStore() {
+      this.state.refresh = localStorage.getItem("refresh") ? localStorage.getItem("refresh") : ''
+    },
+  },
+  modules: {}
 })

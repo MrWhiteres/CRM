@@ -1,340 +1,242 @@
 <template>
-  <v-card>
-    <v-container>
-      <v-card>
-        <v-alert
-          v-if="error"
-          dismissible
-          type="error"
-          @click="error = null"
-        >
-          {{ error }}
-        </v-alert>
-        <v-form @submit.prevent="updateProfile">
-          <v-card-title class="text-center">Редактор профиля</v-card-title>
-          <v-container>
-            <v-row>
-              <v-col>
-                <input-ui v-model="userData.first_name"
-                          label="Имя"
-                          variant="outlined"
-                          readonly/>
-                <input-ui v-model="userData.last_name"
-                          label="Фамилия"
-                          variant="outlined"
-                          readonly/>
-                <input-ui v-if="userData.phone_number"
-                          v-model="userData.phone_number"
-                          label="Номер телефона"
-                          variant="outlined"
-                          readonly/>
-                <input-ui v-else v-model="noneData"
-                          label="Номер телефона"
-                          variant="outlined"
-                          readonly/>
-                <v-img v-if="userData.image"
-                       :aspect-ratio="1"
-                       :src="userData.image"
-                       cover
-                       width="300"/>
-                <input-ui v-else
-                          variant="outlined"
-                          v-model="noneData"
-                          label="Фото"
-                          readonly/>
-              </v-col>
-              <v-col>
-                <input-ui id="first_name"
-                          v-model="updatedUserData.first_name"
-                          :counter="true"
-                          :dense="true"
-                          variant="outlined"
-                          :maxlength="50"
-                          :outlined="false"
-                          :placeholder="'Степан'"
-                          :rules="[rules.minLength]"
-                          :type="'text'"
-                          clearable
-                          label="Имя"
-                          prepend-icon="mdi-rename"
-                          @change="validateDataChange"
-                          @click:clear="validateDataChange"
-                />
-                <input-ui id="last_name"
-                          v-model="updatedUserData.last_name"
-                          :counter="true"
-                          variant="outlined"
-                          :dense="true"
-                          :maxlength="50"
-                          :outlined="false"
-                          :placeholder="'Бандера'"
-                          :rules="[rules.minLength]"
-                          :type="'text'"
-                          clearable
-                          label="Фамилия"
-                          prepend-icon="mdi-rename-box-outline"
-                          @change="validateDataChange"
-                          @click:clear="validateDataChange"
-                />
-                <input-ui id="number"
-                          v-model="updatedUserData.phone_number"
-                          :counter="true"
-                          :dense="true"
-                          :maxlength="15"
-                          variant="outlined"
-                          :outlined="false"
-                          :placeholder="'380998877666'"
-                          :rules="[rules.isNumber,rules.minLengthNumber]"
-                          :type="'text'"
-                          clearable
-                          label="Номер телефона"
-                          prepend-icon="mdi-card-account-phone"
-                          @change="validateDataChange"
-                          @click:clear="validateDataChange"
-                />
-                <v-file-input id="image"
-                              v-model="updatedUserData.image"
-                              :rules="[rules.isImage]"
-                              :show-size="1000"
-                              accept="image/*"
-                              label="Фото"
-                              variant="outlined"
-                              prepend-icon="mdi-paperclip"
-                              @change="validateImageChange($event)"
-                              @click:clear="validateImageChange($event)"
-                />
-              </v-col>
-            </v-row>
+  <v-card class="v-form" elevation="20">
+    <v-alert
+      v-if="error"
+      dismissible
+      type="error"
+      @click="error = null"
+    >
+      {{ error }}
+    </v-alert>
+    <v-form>
+      <v-card-title class="text-center v-title">Редактор профиля</v-card-title>
+      <v-sheet border class="v-sheet">
+        <v-text-field
+          v-model="updatedUserData.first_name"
+          :counter="true"
+          :dense="true"
+          variant="outlined"
+          :maxlength="50"
+          :outlined="false"
+          :placeholder="'Степан'"
+          :rules="[rules.minLength]"
+          :type="'text'"
+          clearable
+          label="Имя^"
+          prepend-icon="mdi-rename"
 
-            <v-alert
-              v-if="infoActiv"
-              dense
-              type="info"
-            >
-              Поля незаполненны. Для обновления профиля заполните поля.
-            </v-alert>
+        />
+        <v-text-field
+          v-model="updatedUserData.last_name"
+          :counter="true"
+          variant="outlined"
+          :dense="true"
+          :maxlength="50"
+          :outlined="false"
+          :placeholder="'Бандера'"
+          :rules="[rules.minLength]"
+          :type="'text'"
 
-            <v-btn block @click="router.push({name: 'profile'})" class="text-caption">Назад к профилю</v-btn>
+          clearable
+          label="Фамилия:"
+          prepend-icon="mdi-rename-box-outline"
+        />
+        <v-text-field
+          v-model="updatedUserData.phone_number"
+          :counter="true"
+          :dense="true"
+          :maxlength="15"
+          variant="outlined"
+          :outlined="false"
+          :placeholder="'380998877666'"
+          :rules="[rules.isNumber,rules.minLengthNumber]"
+          :type="'text'"
+          clearable
 
-            <v-btn :disabled="isActiv || isLoading" class="text-caption" block color="primary" type="submit">
-              <span v-if="!isLoading">Обновить профиль</span>
-              <span v-else>
+          label="Номер телефона:"
+          prepend-icon="mdi-card-account-phone"
+        />
+        <v-file-input
+          v-model="updatedUserData.image"
+          :show-size="1000"
+          accept="image/*"
+          label="Фото:"
+          variant="outlined"
+          prepend-icon="mdi-paperclip"
+          clearable
+        />
+        <div v-if="updatedUserData.image.length > 0" style="display: grid; place-items: center">
+          <v-img
+            :width="150"
+            aspect-ratio="16:9"
+            :height="150"
+            cover
+            :src="imageSrc"
+          />
+        </div>
+      </v-sheet>
+    </v-form>
+    <v-alert
+      v-if="infoActiv"
+      dense
+      type="info"
+    >
+      Поля неизмененны. Для обновления профиля измените поля.
+    </v-alert>
+    <v-card-text>
+      <v-row>
+        <v-col cols="6">
+          <v-btn variant="outlined" block @click="router.push({name: 'profile'})" class="text-caption">Назад к профилю
+          </v-btn>
+        </v-col>
+        <v-col cols="6">
+          <v-btn variant="outlined" :disabled="isActiv || isLoading" class="text-caption" block color="primary"
+                 @click="updateProfile">
+            <span v-if="!isLoading">Обновить профиль</span>
+            <span v-else>
                <v-progress-circular color="#ffffff" indeterminate size="20"/>
             </span>
-            </v-btn>
-
-          </v-container>
-        </v-form>
-      </v-card>
-    </v-container>
-    <v-row justify="center">
-      <v-dialog
-        v-model="dialog"
-        persistent
-        width="auto"
-      >
-        <v-card>
-          <v-card-text>Профиль успешно обновлен.</v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="green-darken-1"
-              variant="text"
-              @click='router.push({name: "profile"})'
-            >
-              Назад в профиль
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-row>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card-text>
   </v-card>
+  <v-row justify="center">
+    <v-dialog
+      v-model="dialog"
+      persistent
+      width="auto"
+    >
+      <v-card>
+        <v-card-text>Профиль успешно обновлен.</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="green-darken-1"
+            variant="text"
+            @click='router.push({name: "profile"})'
+          >
+            Назад в профиль
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
 
-
-<script>
+<script setup>
 import {useStore} from "vuex";
-import axios from "axios";
 import {useRouter} from "vue-router";
-import {maxLength, minLength, numeric} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
-import InputUi from "@/components/UI/InputUI.vue";
+import {computed, ref, watch} from "vue";
+import axios from "axios";
 
-export default {
-  name: "ProfileEditor",
-  components: {InputUi},
-  setup() {
-    const store = useStore()
-    const getCurrentUserData = async () => {
-      try {
-        const response = await axios.get(`user/profile/`)
-        if (
-          !(response.data.email === store.state.user.email &&
-            response.data.first_name === store.state.user.first_name &&
-            response.data.last_name === store.state.user.last_name &&
-            response.data.full_name === store.state.user.full_name &&
-            response.data.image === store.state.user.image &&
-            response.data.phone_number === store.state.user.phone_number &&
-            response.data.type === store.state.user.type)
-        ) {
-          store.commit('setUser', response.data)
-        }
-      } catch (error) {
 
-      }
-    }
-    getCurrentUserData()
-    return {
-      store,
-      router: useRouter(),
-      v$: useVuelidate(),
-    }
+const store = useStore()
+const router = useRouter()
+const userData = store.state.user
+const updatedUserData = ref({
+  first_name: userData.first_name,
+  last_name: userData.last_name,
+  phone_number: userData.phone_number,
+  image: [],
+  selected_time: [],
+})
+
+const imageSrc = computed(() => {
+  if (updatedUserData.value.image.length > 0) {
+    return URL.createObjectURL(updatedUserData.value.image[0])
+  } else {
+    return ''
+  }
+})
+const rules = ref({
+  minLength: value => {
+    return !value || value.length >= 3 || 'Мінімальна довжина поля складає 3 символів.'
   },
-  mounted() {
-    setInterval(async () => {
-      this.v$.$touch()
-    })
-
+  minLengthNumber: value => {
+    return !value || value.length >= 10 || 'Мінімальна довжина поля складає 10 символів.'
   },
-  data() {
-
-    return {
-      userData: this.store.state.user,
-      updatedUserData: {
-        firstName: "",
-        lastName: "",
-        phone_number: '',
-        image: [],
-        selected_time: [],
-      },
-      work_time: [],
-      dialog: false,
-      noneData: 'Нет информации',
-      isActiv: true,
-      isLoading: false,
-      infoActiv: true,
-      existFieldData: {},
-      error: null,
-      rules: {
-        minLength: value => {
-          return !value || value.length >= 5 || 'Мінімальна довжина поля складає 5 символів.'
-        },
-        minLengthNumber: value => {
-          return !value || value.length >= 10 || 'Мінімальна довжина поля складає 10 символів.'
-        },
-        isNumber: value => {
-          return !value || Boolean(Number(value)) || 'Допустимі тільки цифри.'
-        },
-        isImage: async value => {
-          return !value || !value[0] || await this.isImage(value[0]) || 'Обраний файл має недоступний тип.'
-        }
-      }
-    };
+  isNumber: value => {
+    return !value || Boolean(Number(value)) || 'Допустимі тільки цифри.'
   },
-  validations() {
-    return {
-      updatedUserData: {
-        first_name: {
-          minLength: minLength(5),
-          maxLength: maxLength(50),
-        },
-        last_name: {
-          minLength: minLength(5),
-          maxLength: maxLength(50),
-        },
-        phone_number: {
-          minLength: minLength(10),
-          maxLength: maxLength(15),
-          numeric: numeric
-        },
-      }
-    }
-  },
-  methods: {
-    async updateProfile() {
-      this.isLoading = true
-      if (this.v$.$invalid) {
-        this.isLoading = false
-      } else {
-        try {
-          await axios.post('user/profile/', this.updatedUserData, {headers: {'Content-Type': 'multipart/form-data'}})
-          this.dialog = true
-          this.isLoading = false
-        } catch (error) {
+})
+watch(updatedUserData.value, async (newValue) => {
+  isActiv.value = infoActiv.value = !(await check_name(newValue.first_name, userData.first_name) || await check_name(newValue.last_name, userData.last_name) || await check_number(newValue.phone_number, userData.phone_number) || newValue.image.length > 0)
+  console.log(updatedUserData.value.image)
+})
 
-        }
-      }
-    },
-    async getDataUpdate() {
-      return Boolean(
-        this.updatedUserData.first_name ||
-        this.updatedUserData.last_name ||
-        this.updatedUserData.phone_number ||
-        this.updatedUserData.image.length > 0
-      )
-    },
-    async validateDataChange() {
-      if (!this.v$.$invalid && await this.getDataUpdate()) {
-        await this.activButton()
-      } else {
-        await this.disableButton()
-        await this.showError()
-      }
-    },
-    async validateImageChange() {
-      const image = this.updatedUserData.image[0]
-      const result = await this.isImage(image)
-      if (image && !this.v$.$invalid && await this.isImage(image)) {
-        await this.activButton()
-      } else {
-        await this.disableButton()
-        await this.showError(image ? !result : false)
-      }
-    },
-    async showError(result = false) {
-      if (this.v$.$invalid && await this.getDataUpdate() || result) {
-        this.error = 'Помилка форми.'
-        this.infoActiv = false
-      }
+const check_name = async (value_new, value_old) => {
+  return value_new !== value_old && value_new && value_new.length >= 3;
 
-    }
-    ,
-    async activButton() {
-      this.isActiv = false
-      this.infoActiv = false
-      this.error = null
-    },
-    async disableButton() {
-      this.isActiv = true
-      this.infoActiv = true
-      this.error = null
-    },
-    async isImage(file) {
-      try {
-        const reader = new FileReader();
-        return await new Promise((resolve, reject) => {
-          reader.onload = () => {
-            const buffer = new Uint8Array(reader.result);
-            const header = Array.from(buffer.slice(0, 4)).map(b => b.toString(16)).join('');
-            if (header === '89504e47') {
-              resolve(true);
-            } else {
-              resolve(false);
-            }
-          };
-          reader.onerror = () => {
-            reject(false);
-          };
-          reader.readAsArrayBuffer(file);
-        });
-      } catch (_) {
-        return false;
-      }
-    }
-  },
 }
+const check_number = async (value_new, value_old) => {
+  return value_new !== value_old && value_new && value_new.length >= 10 && value_new.length <= 16 && Boolean(Number(value_new))
+}
+
+
+const work_time = ref([])
+const dialog = ref(false)
+const noneData = ref('Нет информации')
+const isActiv = ref(true)
+const isLoading = ref(false)
+const infoActiv = ref(true)
+const existFieldData = ref({})
+const error = ref(null)
+
+const getCurrentUserData = async () => {
+  try {
+    const response = await axios.get(`user/profile/`)
+    if (
+      !(response.data.email === store.state.user.email &&
+        response.data.first_name === store.state.user.first_name &&
+        response.data.last_name === store.state.user.last_name &&
+        response.data.full_name === store.state.user.full_name &&
+        response.data.image === store.state.user.image &&
+        response.data.phone_number === store.state.user.phone_number &&
+        response.data.type === store.state.user.type)
+    ) {
+      store.commit('setUser', response.data)
+    }
+    console.log(123123)
+  } catch (error) {
+  }
+}
+
+getCurrentUserData();
+const updateProfile = () => {
+  isLoading.value = true
+  try {
+    axios.post('user/profile/', updatedUserData.value, {headers: {'Content-Type': 'multipart/form-data'}})
+    dialog.value = true
+    isLoading.value = false
+  } catch (error) {
+  }
+
+}
+
+
 </script>
 
 <style scoped>
+.v-sheet {
+  padding: 10px;
+}
 
+.v-form {
+  margin-top: 3%;
+  min-width: 30%;
+  padding: 10px;
+  margin-bottom: 30px;
+}
+
+.v-title {
+  margin-top: -9%;
+}
+
+@media screen and (max-width: 800px) {
+  .v-form {
+    min-width: 100%;
+  }
+
+}
 </style>

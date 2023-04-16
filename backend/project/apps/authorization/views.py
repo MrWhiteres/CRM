@@ -92,7 +92,7 @@ class ImageAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, *args, **kwargs) -> FileResponse:
-        image = request.user.profile.image
+        image = request.user.image
         response = FileResponse(open(image.path, 'rb'))
         response['Content-Disposition'] = f'attachment; filename={image.name}'
         return response

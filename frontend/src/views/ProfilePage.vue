@@ -1,14 +1,15 @@
 <template>
-  <div class="container">
-    <v-card class="card-base">
+  <v-card class="card-base">
+    <v-card-title>Профиль пользователя: {{ user.full_name }}</v-card-title>
+    <v-card-text>
       <v-row>
-        <v-col cols="3">
-          <v-img :src="user.image || ''" contain height="200"
-                 rounded></v-img>
+        <v-col cols="12" md="3">
+          <v-sheet>
+            <v-img :src="user.image || 'https://pipesak.com/wp-content/uploads/2019/09/Mike-Place-Holder-PipeSak-About-Page.jpg'" contain height="200" rounded></v-img>
+          </v-sheet>
         </v-col>
-        <v-col cols="9">
-          <v-card-title>{{ user.full_name }}</v-card-title>
-          <v-card-text>
+        <v-col cols="12" md="9">
+          <v-sheet>
             <v-list>
               <v-list-item>
                 <v-list-item-title v-text="'Электронная почта:'"/>
@@ -21,17 +22,18 @@
               </v-list-item>
               <v-list-item>
                 <v-list-item-title>Тип аккаунта:</v-list-item-title>
-                <v-list-item-subtitle>{{ returnUserRole(user.type) }}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{ user.type }}</v-list-item-subtitle>
               </v-list-item>
             </v-list>
-          </v-card-text>
+          </v-sheet>
         </v-col>
       </v-row>
-      <v-card-actions style="justify-content: center">
-        <v-btn variant="outlined" @click="editProfile">Редактировать профиль</v-btn>
-      </v-card-actions>
-    </v-card>
-  </div>
+    </v-card-text>
+    <v-card-actions style="justify-content: center">
+      <v-btn variant="outlined" @click="editProfile">Редактировать профиль</v-btn>
+    </v-card-actions>
+  </v-card>
+
 </template>
 <script>
 import {useRouter} from "vue-router";
@@ -41,20 +43,9 @@ import axios from "axios";
 export default {
   name: 'ProfilePage',
   setup() {
-    const returnUserRole = (type) => {
-      const userRole = {
-        'admin': 'Администратор',
-        'user': 'Пользователь',
-        'coach': 'Тренер',
-        'head_coach': 'Старший тренер',
-        'operator': 'Оператор'
-      }
-      return userRole[type]
-    }
     return {
       router: useRouter(),
       store: useStore(),
-      returnUserRole
     }
   },
   data() {
@@ -67,6 +58,7 @@ export default {
       try {
         const response = await axios.get(`user/profile/`)
         let image = response.data.image
+        console.log(response.data)
         if (image) {
           response.data.image = await this.getImage()
         }
@@ -108,12 +100,7 @@ export default {
 </script>
 
 <style>
-.container {
-  max-width: 80%;
-}
-
 .card-base {
-  min-width: 100%;
-  left: 10%;
+  min-width: 70%;
 }
 </style>

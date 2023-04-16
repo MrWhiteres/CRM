@@ -70,7 +70,9 @@ import GoogleAuth from "@/components/GoogleAuth.vue";
 import SubmitButtonUi from "@/components/UI/SubmitButtonUI.vue";
 
 const emailPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
-const passwordPattern = /^\S*(?=\S{8,})(?=\S*\d)(?=\S*[A-Z])(?=\S*[a-z])(?=\S*[!@#$%^&*? ])\S*$/
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*? ])[a-zA-Z0-9!@#$%^&*? ]{8,}$/
+
+
 const emailValidate = (value) => {
   return emailPattern.test(value)
 }
@@ -118,7 +120,7 @@ export default {
           return uppercaseRegex.test(value) || 'Пароль должен содержать хотя бы одну букву верхнего регистра.'
         },
         englishLettersOnly: value => {
-          const englishLettersOnlyRegex = /^[a-zA-Z]+$/
+          const englishLettersOnlyRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};:\\|,.<>/?]+$/
           return englishLettersOnlyRegex.test(value) || 'Пароль должен содержать только буквы английского алфавита.'
         },
         lowercaseRegex: value => {

@@ -10,25 +10,23 @@
 
         <div v-else>
           <v-app-bar app>
-            <v-app-bar-nav-icon @click="drawer = !drawer"/>
+            <v-app-bar-nav-icon :icon="drawer ? 'mdi-menu' : 'mdi-menu-open'" v-if="height === 220"
+                                @click="drawer = !drawer"/>
+            <tab-auth v-if="store.state.user && height > 220"/>
+            <tab-base v-if="!store.state.user && height > 220"/>
           </v-app-bar>
           <v-navigation-drawer
             v-model="drawer"
             app
             temporary
           >
-            <div v-if="store.state.user">
-              <left-menu-auth/>
-            </div>
-            <div v-else>
-              <left-menu-base/>
-            </div>
-            <div v-if="store.state.user">
-              <div class="pa-2">
-                <v-btn block @click="logout">
-                  Выход
-                </v-btn>
-              </div>
+            <left-menu-auth v-if="store.state.user"/>
+            <left-menu-base v-else/>
+
+            <div class="pa-2">
+              <v-btn v-if="store.state.user" block @click="logout">
+                Выход
+              </v-btn>
             </div>
           </v-navigation-drawer>
           <v-main>
@@ -51,12 +49,14 @@ import axios from "axios";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {useDisplay} from 'vuetify'
-import LeftMenuAuth from "@/components/LeftMenuAuth.vue";
-import LeftMenuBase from "@/components/LeftMenuBase.vue";
+import LeftMenuBase from "@/components/navigation/LeftMenuBase.vue";
+import LeftMenuAuth from "@/components/navigation/LeftMenuAuth.vue";
+import TabAuth from "@/components/navigation/TabAuth.vue";
+import TabBase from "@/components/navigation/TabBase.vue";
 
 export default {
   name: 'App',
-  components: {LeftMenuBase, LeftMenuAuth},
+  components: {TabBase, TabAuth, LeftMenuBase, LeftMenuAuth},
   setup() {
     const store = useStore();
     const {name} = useDisplay()
@@ -87,7 +87,7 @@ export default {
       if (window.location.pathname.includes('/confirm_email/') && store.state.user) {
         router.push({name: 'profile'});
       } else {
-        if ('auth/' !== router.currentRoute.value.fullPath && !store.state.user) {
+        if (!['auth/', 'form/'].includes(router.currentRoute.value.fullPath && !store.state.user)) {
           router.push({name: 'auth'});
         }
       }
@@ -178,6 +178,7 @@ export default {
     return {
       drawer: false,
       group: null,
+      activeTab: null
     }
   },
 }
@@ -189,7 +190,6 @@ export default {
   display: grid;
   place-items: center;
 }
-
 
 
 .loader-container {

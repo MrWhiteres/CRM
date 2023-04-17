@@ -16,7 +16,7 @@ from .utils.coach import (
     clear_data, mark_visit_creation,
     return_time, new_clients, create_new_clients_coach, return_class_type
 )
-from .utils.form_client import register_client, clean_data
+from .utils.form_client import register_client, clean_data, get_form_data
 from .utils.operators import (
     get_all_new_clients, get_operator_client_status,
     get_group_client_status, get_all_coach,
@@ -76,7 +76,7 @@ class NewClientsCoach(CreateAPIView, RetrieveAPIView):
         return JsonResponse(data={}, status=HTTP_200_OK)
 
 
-class NewClientsWithFormsAPI(CreateAPIView):
+class NewClientsWithFormsAPI(CreateAPIView, RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = [FormSerializer]
 
@@ -86,6 +86,9 @@ class NewClientsWithFormsAPI(CreateAPIView):
             if new_data.is_valid():
                 return {**new_data.validated_data}
         return False
+
+    def get(self, request, *args, **kwargs) -> JsonResponse:
+        return JsonResponse(data=get_form_data(), status=HTTP_200_OK)
 
     def post(self, request, *args, **kwargs) -> JsonResponse:
         register_client(self.serializer_data(clean_data(request.data)))

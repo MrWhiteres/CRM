@@ -151,13 +151,13 @@ const imageSrc = computed(() => {
 })
 const rules = ref({
   minLength: value => {
-    return !value || value.length >= 3 || 'Мінімальна довжина поля складає 3 символів.'
+    return !value || value.length >= 3 || 'Минимальная длинна поля составляет 3 символов.'
   },
   minLengthNumber: value => {
-    return !value || value.length >= 10 || 'Мінімальна довжина поля складає 10 символів.'
+    return !value || value.length >= 10 || 'Минимальная длинна поля составляет 10 символов.'
   },
   isNumber: value => {
-    return !value || Boolean(Number(value)) || 'Допустимі тільки цифри.'
+    return !value || Boolean(Number(value)) || 'Допустимы только цифры.'
   },
 })
 watch(updatedUserData.value, async (newValue) => {

@@ -11,6 +11,7 @@ import {fas} from "@fortawesome/free-solid-svg-icons";
 import components from "@/components";
 import components_ui from "@/components/UI"
 import moment from "moment/dist/moment"
+import naive from 'naive-ui'
 import ru from "moment/dist/locale/ru"
 
 moment.locale("ru", ru)
@@ -41,5 +42,6 @@ export function registerPlugins(app) {
       iconfont: 'mdi'
     })
     .use(router)
+    .use(naive)
     .use(GoogleSignInPlugin, gauthOption)
 }

@@ -48,7 +48,7 @@
                         v-text="'Подтвердить'"/>
     </v-container>
     <div class="d-flex justify-content-center align-items-center">
-      <v-divider class="border-opacity-100" style="margin-top: 10px"/>
+        <v-divider class="border-opacity-100" style="margin-top: 10px"/>
       <span style="margin-left: 10px; margin-right: 10px">Или</span>
       <v-divider class="border-opacity-100" style="margin-top: 10px"/>
     </div>

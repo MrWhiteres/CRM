@@ -1,22 +1,15 @@
 from .coach import check_client
-from ..models import Clients, FormClient, OtherData
+from ..models import Clients, FormClient, OtherData, AllTime, Location, Days, Age, GroupType, Section
 
 
 def register_client(data: dict):
-    create_form_client(data)
-
-
-def create_form_client(data: dict):
-
     if not check_client(data['phone_number']):
         Clients.objects.create(
             name=data['name'], phone_number=data['phone_number'],
             payed_status=Clients.NEW_CLIENT, status=Clients.NEW,
-            status_coach=Clients.NOT_RECORDED, status_operator=Clients.NOT_CHECK
+            status_coach=Clients.NOT_CHECKED, status_operator=Clients.NOT_CHECK
         ).save()
-
-    client = Clients.objects.get(phone_number=data['phone_number'])
-
+    client = check_client(data['phone_number'])
     data_base: dict = dict(client=client)
     data_other: dict = dict(client=client)
 
@@ -42,7 +35,7 @@ def create_form_client(data: dict):
 
 def dict_filter(dict_obj: dict, model: FormClient or OtherData) -> None:
     for val in dict_obj.values():
-        if isinstance(val, Clients) or not len(val) > 1:
+        if isinstance(val, Clients) or not val or not len(val) > 1:
             continue
         return create_form(model, dict_obj)
     return None
@@ -58,3 +51,24 @@ def clean_data(data: dict) -> dict:
     for key in delete_key:
         del data[key]
     return data
+
+
+def get_form_data() -> dict:
+    return dict(
+        time=[{"title": element.time, "value": element.id} for element in AllTime.objects.all()],
+        location=[{"title": element.location, "value": element.id} for element in Location.objects.all()],
+        days=[{"title": element.day, "value": element.id} for element in Days.objects.all()],
+        age=[{"title": element.age, "value": element.id} for element in Age.objects.all()],
+        groups_type=[{"title": element.class_type, "value": element.id} for element in GroupType.objects.all()],
+        **return_section()
+    )
+
+
+def return_section() -> dict:
+    all_section = Section.objects.all()
+    return dict(
+        yoga_type=[{"title": element.section, "value": element.key} for element in all_section if
+                   'yoga_sec_' in element.key],
+        matrial_arts_type=[{"title": element.section, "value": element.key} for element in all_section if
+                           'mat_sec_' in element.key],
+    )

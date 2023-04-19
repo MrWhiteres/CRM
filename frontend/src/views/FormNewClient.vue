@@ -1,402 +1,470 @@
 <template>
-  <v-card class="form-client">
-    <v-form @submit.prevent="submitForm">
-      <v-container>
-        <v-card>
-          <v-card-title className="text-center">
-            Записаться на тренировки
-          </v-card-title>
-          <v-card-subtitle class="text-caption form-description">
-            Для того чтобы начать тренироваться, заполните данную анкету. Свяжитесь с администратором после заполнения.
-            Контактный номер:
-            +380971916680, +380996374872, +380994687607
-          </v-card-subtitle>
-        </v-card>
-      </v-container>
+  <v-responsive>
+    <v-sheet style="display: grid; place-items: center">
+      <v-card class="v-card-base" elevation="15" style="padding: 15px">
+        <v-form @submit.prevent="submitForm">
+          <v-card elevation="10" class="header-card">
+            <v-card-title class="text-center text-caption">
+              Записаться на тренировки
+            </v-card-title>
+            <v-card-text class="text-center text-caption form-description" style="margin-bottom: 15px">
+              Для того чтобы начать тренироваться, заполните данную анкету.
+              Свяжитесь с администратором после заполнения.
+              Контактные номера: +380971916680, +380996374872, +380994687607
+            </v-card-text>
+          </v-card>
+          <v-card elevation="10" class="mb-4">
+            <v-card-title class="text-center text-caption">Персональная информация:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="formClient.name"
+                :counter="true"
+                :maxlength="50"
+                :minlength="3"
+                :rules="[rules.requiredField, rules.minNameLength]"
+                clearable
+                label="Имя"
+                variant="underlined"
+              />
+              <v-text-field
+                v-model="formClient.phone_number"
+                :counter="true"
+                :maxlength="50"
+                :minlength="3"
+                clearable
+                :rules="[rules.requiredField, rules.minNumberLength, rules.isNumber]"
+                label="Номер телефона"
+                placeholder="380778899555"
+                variant="underlined"
+              />
+            </v-card-text>
+          </v-card>
+          <v-card elevation="10" class="mb-4">
+            <v-card-title class="text-center text-caption">Выберите тип тренировок:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-text class="text-center text-caption">
+              <v-btn-toggle
+                v-model="formClient.choice"
+                rounded="x10"
+                variant="outlined"
+                class="text-caption mb-4"
+                color="blue-accent-4"
+                group
+                @click="clear_data"
+              >
+                <v-btn
+                  class="text-caption" value="yoga"
+                  round
+                >
+                  Йога
+                </v-btn>
+                <v-btn class="text-caption"
+                       value="martialArts" round
+                >
+                  Единоборства
+                </v-btn>
+              </v-btn-toggle>
+            </v-card-text>
+          </v-card>
 
+          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+            <v-card-title class="text-center text-caption">Выберите тип секции:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-subtitle class="text-center text-caption">
+              (Возможно несколько вариантов)
+            </v-card-subtitle>
+            <v-card-text>
+              <template v-if="formClient.choice === 'yoga'">
+                <v-checkbox
+                  v-model="formClient.yoga_type"
+                  :label="yoga.title"
+                  :value="yoga.value"
+                  color="primary"
+                  v-for="(yoga, index) in yogaType"
+                  :key="index"
+                />
+                <v-select
+                  v-model="formClient.yoga_type"
+                  :items="yogaType"
+                  readonly
+                  variant="underlined"
+                  label="Выбранные секции:"
+                  chips
+                />
+                <v-text-field
+                  v-model="formClient.other_yoga_type"
+                  :counter="true"
+                  :maxlength="50"
+                  :minlength="3"
+                  label="Другие виды:"
+                  variant="underlined"
+                />
+              </template>
+              <template v-else-if="formClient.choice === 'martialArts'">
+                <v-checkbox
+                  v-model="formClient.matrial_arts_type"
+                  :label="matrial_arts.title"
+                  :value="matrial_arts.value"
+                  color="primary"
+                  v-for="(matrial_arts, index) in matrial_arts_type"
+                  :key="index"
+                />
+                <v-select
+                  v-model="formClient.matrial_arts_type"
+                  :items="matrial_arts_type"
+                  readonly
+                  variant="underlined"
+                  label="Выбранные секции:"
+                  chips
+                />
+                <v-text-field
+                  v-model="formClient.other_matrial_arts_type"
+                  :counter="true"
+                  :maxlength="50"
+                  :minlength="3"
+                  label="Другие виды:"
+                  variant="underlined"
+                />
+              </template>
+              <template v-else>
+                <v-card-subtitle class="text-center">
+                  Секции отобразятся как только будет выбран тип тренировок.
+                </v-card-subtitle>
+              </template>
+            </v-card-text>
+          </v-card>
 
-      <v-container>
-        <v-card>
-          <v-card-text style="margin-top: 10px">
-            <v-select
-              v-model="formClient.choice"
-              :items="choiceSection"
-              label="Тип тренировок:"
-              variant="underlined"
-              @change="console.log('change event')"
-            />
-          </v-card-text>
-        </v-card>
-      </v-container>
+          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+            <v-card-title class="text-center text-caption">Выберите тип занятий:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-text>
+              <v-row>
+                <v-col v-for="(type_group, index) in groups_type" :key="index" cols="6">
+                  <v-checkbox
+                    v-model="formClient.class_type"
+                    :label="type_group.title"
+                    :value="type_group.value"
+                    color="primary"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
 
+          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+            <v-card-title class="text-center text-caption">Возрастная категория занятий:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-text>
+              <v-row>
+                <v-col v-for="(age, index) in ages" :key="index" cols="6">
+                  <v-checkbox
+                    v-model="formClient.age"
+                    :label="age.title"
+                    :value="age.value"
+                    color="primary"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
 
-      <v-container v-if="['yoga', 'martialArts'].includes(formClient.choice)">
-        <v-card>
-          <v-card-title class="text-center text-caption">Персональная информация:</v-card-title>
-          <v-card-text>
-            <v-text-field
-              v-model="formClient.name"
-              :counter="true"
-              :maxlength="50"
-              :minlength="3"
-              clearable
-              label="Имя"
-              variant="underlined"
-            />
-            <v-text-field
-              v-model="formClient.phone_number"
-              :counter="true"
-              :maxlength="50"
-              :minlength="3"
-              clearable
-              label="Номер телефона"
-              placeholder="+380778899555"
-              variant="underlined"
-            />
-          </v-card-text>
-        </v-card>
-      </v-container>
+          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+            <v-card-title class="text-center text-caption">Выберите локацию для тренировок:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-subtitle class="text-center text-caption">
+              (Возможно несколько вариантов)
+            </v-card-subtitle>
+            <v-card-text>
+              <v-row>
+                <v-col v-for="(loc, index) in location" :key="index" cols="5">
+                  <v-checkbox
+                    v-model="formClient.training_location"
+                    :label="loc.title"
+                    :value="loc.value"
+                    color="primary"
+                  />
+                </v-col>
+              </v-row>
+              <v-select
+                v-model="formClient.training_location"
+                :items="location"
+                readonly
+                variant="underlined"
+                label="Выбранные локации для тренировок:"
+                chips
+              />
+              <v-text-field
+                v-model="formClient.other_location"
+                :counter="true"
+                :maxlength="50"
+                :minlength="3"
+                label="Другие локации:"
+                variant="underlined"
+              />
+            </v-card-text>
+          </v-card>
+          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+            <v-card-title class="text-center text-caption">Выберите день посещения:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-subtitle class="text-center text-caption">
+              (Возможно несколько вариантов)
+            </v-card-subtitle>
+            <v-card-text>
+              <v-row>
+                <v-col v-for="(day, index) in visit_day" :key="index" cols="5">
+                  <v-checkbox
+                    v-model="formClient.visit_day"
+                    :label="day.title"
+                    :value="day.value"
+                    color="primary"
+                  />
+                </v-col>
+              </v-row>
+              <v-select
+                v-model="formClient.visit_day"
+                :items="visit_day"
+                readonly
+                variant="underlined"
+                label="Выбранные дни тренировок:"
+                chips
+              />
+            </v-card-text>
+          </v-card>
+          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+            <v-card-title class="text-center text-caption">Выберите день посещения:
+              <n-gradient-text type="error">
+                *
+              </n-gradient-text>
+            </v-card-title>
+            <v-card-subtitle class="text-center text-caption">
+              (Возможно несколько вариантов)
+            </v-card-subtitle>
+            <v-card-text>
+              <v-row>
+                <v-col v-for="(tm, index) in time" :key="index" cols="3">
+                  <v-checkbox
+                    v-model="formClient.training_time"
+                    :label="tm.title"
+                    :value="tm.value"
+                    color="primary"
+                  />
+                </v-col>
+              </v-row>
+              <v-select
+                v-model="formClient.training_time"
+                :items="time"
+                readonly
+                variant="underlined"
+                label="Выбранное время для тренировок:"
+                chips
+              />
+            </v-card-text>
+          </v-card>
 
-
-      <v-container v-if="formClient.choice === 'yoga'">
-        <v-card>
-          <v-card-text>
-            <v-select
-              v-model="formClient.yoga_type"
-              :items="yogaType"
-              label="Виды йоги:"
-              multiple
-              variant="underlined"
-            />
-            <v-text-field
-              v-model="formClient.other_yoga_type"
-              :counter="true"
-              :maxlength="50"
-              :minlength="3"
-              label="Другие виды:"
-              variant="underlined"
-            />
-          </v-card-text>
-        </v-card>
-      </v-container>
-
-      <v-container v-if="formClient.choice === 'martialArts'">
-        <v-card>
-          <v-card-text>
-            <v-select
-              v-model="formClient.matrial_arts_type"
-              :items="matrialArtsType"
-              label="Вид единоборств:"
-              multiple
-              variant="underlined"
-            />
-            <v-text-field
-              v-model="formClient.other_matrial_arts_type"
-              :counter="true"
-              :maxlength="50"
-              :minlength="3"
-              label="Другие виды:"
-              variant="underlined"
-            />
-          </v-card-text>
-        </v-card>
-      </v-container>
-
-
-      <v-container v-if="['yoga', 'martialArts'].includes(formClient.choice)">
-        <v-card>
-          <v-card-title class="text-center text-caption">Общая информация о занятиях:</v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="formClient.class_type"
-              :items="classType"
-              label="Тип занятий"
-              variant="underlined"
-            />
-            <v-select
-              v-model="formClient.training_location"
-              :items="states"
-              clearable
-              label="Локация тренировок (возможно несколько вариантов)"
-              multiple
-              variant="underlined"
-            />
-
-            <v-text-field
-              v-model="formClient.other_location"
-              :counter="true"
-              :maxlength="50"
-              :minlength="3"
-              clearable
-              label="Другие локации:"
-              placeholder="Дружбы народов, и тд..."
-              variant="underlined"
-            />
-
-            <v-select
-              v-model="formClient.age"
-              :items="fightAge"
-              clearable
-              label="Возрастная категория:"
-              variant="underlined"
-            />
-
-            <v-select
-              v-model="formClient.training_time"
-              :items="trainingTime"
-              clearable
-              label="Время тренировок:"
-              multiple
-              variant="underlined"
-            />
-
-            <v-select
-              v-model="formClient.visit_day"
-              :items="visitDay"
-              clearable
-              label="Дни тренировок (возможно несколько вариантов):"
-              multiple
-              variant="underlined"
-            />
-          </v-card-text>
-
-        </v-card>
-      </v-container>
-      <v-card v-if="['yoga', 'martialArts'].includes(formClient.choice)" class="text-center">
-        <v-container>
-          <v-btn :disabled="disabled" :loading="loading" class="text-success text-caption text-capitalize"
-                 type="submit">Отправить форму
-          </v-btn>
-        </v-container>
-
+          <v-card elevation="10" class="mb-4">
+            <v-card-text v-if="allert || base_allert">
+              <v-alert variant="outlined" type="info" v-if="allert || base_allert">
+                <p
+                  v-if="!formClient.name ||  !formClient.phone_number || formClient.name.length < 3 || formClient.phone_number.length < 10 || !Boolean(Number(formClient.phone_number))">
+                  Ошибка в полях Име и Телефон!</p>
+                <n-ul>
+                  <n-li v-if="!formClient.name"> Поле "Имя" обязательно к заполнению.</n-li>
+                  <n-li v-if="formClient.name && formClient.name.length >= 1 && formClient.name.length < 3">Минимальная
+                    длинна поля "Имя" 3
+                    символа.
+                  </n-li>
+                  <n-li v-if="!formClient.phone_number"> Поле "Телефон" обязательно к заполнению.</n-li>
+                  <n-li
+                    v-if="formClient.phone_number && formClient.phone_number.length >= 1 && formClient.phone_number.length < 10">
+                    Минимальная
+                    длинна поля "Телефон" 10 символов.
+                  </n-li>
+                  <n-li
+                    v-if="formClient.phone_number && formClient.phone_number.length > 1 && !Boolean(Number(formClient.phone_number))">
+                    В поле
+                    "Телефон" допустимы только цифры.
+                  </n-li>
+                </n-ul>
+                <p v-if="!formClient.choice">Вы не выбрали тип тренировки.</p>
+                <p v-if="formClient.choice && allert && base_allert">Вы не выбрали:</p>
+                <n-ul v-if="formClient.choice">
+                  <n-li
+                    v-if="formClient.choice === 'yoga' && formClient.yoga_type.length === 0 && formClient.other_yoga_type.length === 0">
+                    Тип секции для тренировок.
+                  </n-li>
+                  <n-li
+                    v-if="formClient.choice === 'martialArts' && formClient.matrial_arts_type.length === 0 && formClient.other_matrial_arts_type.length === 0">
+                    Тип секции для тренировок.
+                  </n-li>
+                  <n-li v-if="formClient.choice && formClient.age.length === 0">Возрастную категорию
+                    тренировок.
+                  </n-li>
+                  <n-li v-if="formClient.other_location.length === 0 && formClient.training_location.length ===0">
+                    Локацию для занятий.
+                  </n-li>
+                  <n-li v-if="formClient.training_time.length === 0">
+                    Время занятий.
+                  </n-li>
+                  <n-li v-if="!formClient.class_type">
+                    Тип занятий.
+                  </n-li>
+                  <n-li v-if="formClient.visit_day.length === 0">
+                    День посещения занятий.
+                  </n-li>
+                </n-ul>
+              </v-alert>
+            </v-card-text>
+            <v-card-actions style="display: grid; place-items: center" class="mt-2 mb-2">
+              <v-btn :disabled="allert" type="submit" block variant="outlined"
+                     class="text-success text-caption text-capitalize">
+                Отправить форму
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-form>
       </v-card>
-
-    </v-form>
-    <div class="text-center">
-      <v-dialog
-        v-model="dialog"
-        width="auto"
-      >
-
-        <v-card>
-          <v-card-text>
-            Форма успешно отправлена
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" block @click="dialog = false">Закрыть</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </div>
-  </v-card>
+    </v-sheet>
+  </v-responsive>
 </template>
 
-<script>
-
+<script setup>
+import {ref, watch} from "vue";
 import axios from "axios";
 
-export default {
-  name: "FormNewClient",
-  data() {
-    return {
-      loading: false,
-      formClient: {
-        choice: false,
-        name: '',
-        phone_number: '',
-        class_type: 'group',
-        training_location: [],
-        other_location: '',
-        training_time: [],
-        visit_day: [],
-        yoga_type: [],
-        age: '',
-        other_yoga_type: '',
-        matrial_arts_type: [],
-        other_matrial_arts_type: '',
-      },
-      clearForm: {
-        choice: false,
-        name: '',
-        phone_number: '',
-        class_type: 'group',
-        training_location: [],
-        other_location: '',
-        training_time: [],
-        visit_day: [],
-        yoga_type: [],
-        age: '',
-        other_yoga_type: '',
-        matrial_arts_type: [],
-        other_matrial_arts_type: '',
-      },
-      dialog: false,
-      choiceSection: [
-        {title: 'Не выбрано', value: false},
-        {title: 'Йога', value: 'yoga'},
-        {title: 'Единоборства', value: 'martialArts'},
-      ],
-      classType: [
-        {title: 'Персональные', value: 'single'},
-        {title: 'Групповые', value: 'group'},
-      ],
-      states: [
-        {title: 'Позняки (Харьковская, Осокорки, Дарницкий район)', key: 'location_1'},
-        {title: 'Лесная', key: 'location_2'},
-        {title: 'Троещина', key: 'location_3'},
-        {title: 'Героев Днепра', key: 'location_4'},
-        {title: 'Оболонь', key: 'location_5'},
-        {title: 'Голосеевская', key: 'location_6'},
-        {title: 'Теремки / Ипподром / ВДНГ', key: 'location_7'},
-        {title: 'Шулявка / Нивки / Берестейка', key: 'location_8'},
-        {title: 'Отрадный / Соломенский', key: 'location_9'},
-        {title: 'Вокзальная / Университет / Льва Толстого', key: 'location_10'},
-        {title: 'Куреневка / Сырец', key: 'location_11'},
-        {title: 'Новобеличи', key: 'location_12'},
-        {title: 'Кловская / Арсенальная', key: 'location_13'}
-      ],
-      yogaAge: [
-        '6-11', '12-15', '16-25', '25-36', '37-50', '51+'
-      ],
-      fightAge: [
-        '6-11', '12-15', '16-25', '25-36', '37-50', '51+',
-      ],
-      trainingTime: [
-        '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00',
-      ],
-      visitDay: [
-        {title: "Понедельник", key: 'day_1'},
-        {title: "Вторник", key: 'day_2'},
-        {title: "Среда", key: 'day_3'},
-        {title: "Четверг", key: 'day_4'},
-        {title: "Пятница", key: 'day_5'},
-        {title: "Суббота", key: 'day_6'},
-        {title: "Воскресенье", key: 'day_7'},
-        {title: "Плавающий график, постоянно разные дни", key: 'day_8'},
-        {title: "Не принципиально, могу и буду ходить в любые дни", key: 'day_9'},
-      ],
-      yogaType: [
-        {title: "Хатха-йога", key: 'yoga_sec_1'},
-        {title: "Хот-йога", key: 'yoga_sec_2'},
-        {title: "Флай-йога", key: 'yoga_sec_3'},
-        {title: "Йога для беременных", key: 'yoga_sec_4'},
-        {title: "Йога после родов", key: 'yoga_sec_5'},
-      ],
-      matrialArtsType: [
-        {title: "Бокс", key: 'mat_sec_1'},
-        {title: "Кикбоксинг/Тайский бокс", key: 'mat_sec_2'},
-        {title: "ММА / Панкратион", key: 'mat_sec_3'},
-        {title: "Рукопашный бой / Самооборона", key: 'mat_sec_4'},
-        {title: "Айкидо", key: 'mat_sec_5'},
-        {title: "Карате", key: 'mat_sec_6'},
-        {title: "Тхеквондо", key: 'mat_sec_7'},
-        {title: "Джиуджитсу / Грепплинг", key: 'mat_sec_8'},
-        {title: "Борьба (Вольная/Самбо)", key: 'mat_sec_9'},
-        {title: "Дзюдо / Самбо", key: 'mat_sec_10'}
-      ],
-      disabled: true
-    }
-  },
-  methods: {
-    async submitForm() {
-      this.loading = true
-      try {
-        await axios.post('forms/', {data: this.formClient})
-        this.loading = false
-        this.formClient = this.clearForm
-        this.dialog = true
-      } catch (_) {
-        this.loading = false
-      }
+const yogaType = ref([])
+const matrial_arts_type = ref([])
+const visit_day = ref([])
+const location = ref([])
+const groups_type = ref('')
+const ages = ref([])
+const time = ref([])
+const allert = ref(true)
+const base_allert = ref(true)
+const rules = ref(
+  {
+    requiredField: value => !!value || 'Обязательное поле.',
+    minNameLength: value => {
+      return value.length >= 3 || 'Минимальная длинна поля 3 символов.'
     },
-    async activateButton() {
+    minNumberLength: value => {
+      return value.length >= 10 || 'Минимальная длинна поля 10 символов.'
+    },
+    isNumber: value => {
+      return !value || Boolean(Number(value)) || 'Допустимы только цифры.'
+    }
+  }
+)
+const formClient = ref({
+  choice: false,
+  name: '',
+  phone_number: '',
+  class_type: '',
+  training_location: [],
+  other_location: '',
+  training_time: [],
+  visit_day: [],
+  yoga_type: [],
+  age: '',
+  other_yoga_type: '',
+  matrial_arts_type: [],
+  other_matrial_arts_type: '',
+})
+const clear_data = async () => {
+  formClient.value.matrial_arts_type = []
+  formClient.value.yoga_type = []
+  formClient.value.other_yoga_type = ''
+  formClient.value.other_matrial_arts_type = ''
+}
+const fetchData = async () => {
+  try {
+    const response = await axios.get('forms/')
+    console.log(response.data, 123)
+    yogaType.value = response.data.yoga_type
+    matrial_arts_type.value = response.data.matrial_arts_type
+    visit_day.value = response.data.days
+    time.value = response.data.time
+    location.value = response.data.location
+    ages.value = response.data.age
+    groups_type.value = response.data.groups_type
+  } catch (_) {
 
-      if (this.formClient.choice === 'yoga') {
-        this.disabled = await this.checkAnswer(await this.checkYogaField())
-      }
-      if (this.formClient.choice === 'martialArts') {
-        this.disabled = await this.checkAnswer(await this.checkMartialArtsField())
-      }
-    },
-    async checkYogaField() {
-      return [
-        this.formClient.name.length > 3,
-        this.formClient.phone_number.length > 10,
-        this.formClient.training_location.length > 0 || this.formClient.other_location.length > 3,
-        this.formClient.training_time.length > 0,
-        this.formClient.visit_day.length > 0,
-        this.formClient.yoga_type.length > 0 || this.formClient.other_yoga_type.length > 3,
-      ]
-    },
-    async checkMartialArtsField() {
-      return [
-        this.formClient.name.length > 3,
-        this.formClient.phone_number.length > 10,
-        this.formClient.training_location.length > 0 || this.formClient.other_location.length > 3,
-        this.formClient.training_time.length > 0,
-        this.formClient.visit_day.length > 0,
-        this.formClient.matrial_arts_type.length > 0 || this.formClient.other_matrial_arts_type.length > 3,
-      ]
-    },
-    async checkAnswer(data) {
-      for (let element of data) {
-        if (!element) {
-          return true
-        }
-      }
+  }
+}
+fetchData()
 
-      return false
-    },
-    clearDataForm() {
-      this.formClient.other_matrial_arts_type = ''
-      this.formClient.matrial_arts_type = []
-      this.formClient.yoga_type = []
-      this.formClient.other_yoga_type = ''
-    }
-  },
-  mounted() {
-    try {
-      setInterval(() => {
-        this.activateButton()
-      })
-    } catch (_) {
-    }
+const submitForm = async () => {
+  try {
+    await axios.post('forms/', {data: formClient.value})
+  } catch (_) {
 
-  },
-  watch: {
-    'formClient.choice': function () {
-      this.clearDataForm()
-    }
   }
 }
 
+watch(formClient, async () => {
+  allert.value = !(
+    formClient.value.choice && formClient.value.age.length !== 0 &&
+    formClient.value.class_type.length !== 0 &&
+    (
+      (formClient.value.yoga_type.length !== 0 || formClient.value.other_yoga_type.length !== 0) ||
+      (formClient.value.matrial_arts_type.length !== 0 || formClient.value.other_matrial_arts_type.length !== 0)
+    ) &&
+    formClient.value.training_time.length !== 0 && (
+      formClient.value.training_location.length !== 0 ||
+      formClient.value.other_location.length !== 0
+    ) &&
+    formClient.value.name && formClient.value.name.length >= 3 &&
+    formClient.value.phone_number && formClient.value.phone_number.length >= 10 && Boolean(Number(formClient.value.phone_number))
+  )
+  base_allert.value = !(
+    formClient.value.choice && formClient.value.age.length !== 0 &&
+    formClient.value.class_type.length !== 0 &&
+    (
+      (formClient.value.yoga_type.length !== 0 || formClient.value.other_yoga_type.length !== 0) ||
+      (formClient.value.matrial_arts_type.length !== 0 || formClient.value.other_matrial_arts_type.length !== 0)
+    ) &&
+    formClient.value.training_time.length !== 0 && formClient.value.training_location.length !== 0
+  )
+}, {deep: true});
 </script>
 
 <style scoped>
-.form-description {
-  font-size: 14px;
-  line-height: 20px;
-  text-align: center;
-  white-space: normal;
+
+.v-card-base {
+  margin-bottom: 50px;
+  padding: 10px;
+  max-width: 40%;
 }
 
-.form-client {
-  max-width: 60%;
-  left: 18%;
-}
-
-@media screen and (max-width: 768px) {
-  .form-description {
-    font-size: 16px;
-    line-height: 24px;
-  }
-
-  .form-client {
+@media screen and (max-width: 800px) {
+  .v-card-base {
     max-width: 100%;
-    min-width: 100%;
-    left: 0;
   }
+
 }
 
-
+.header-card {
+  margin-bottom: 15px;
+}
 </style>

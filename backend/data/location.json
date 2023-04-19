@@ -3,104 +3,91 @@
     "model": "crm.location",
     "pk": 1,
     "fields": {
-      "location": "Позняки (Харьковская, Осокорки, Дарницкий район)",
-      "key": "location_1"
+      "location": "Позняки (Харьковская, Осокорки, Дарницкий район)"
     }
   },
   {
     "model": "crm.location",
     "pk": 2,
     "fields": {
-      "location": "Лесная",
-      "key": "location_2"
+      "location": "Лесная"
     }
   },
   {
     "model": "crm.location",
     "pk": 3,
     "fields": {
-      "location": "Троещина",
-      "key": "location_3"
+      "location": "Троещина"
     }
   },
   {
     "model": "crm.location",
     "pk": 4,
     "fields": {
-      "location": "Героев Днепра",
-      "key": "location_4"
+      "location": "Героев Днепра"
     }
   },
   {
     "model": "crm.location",
     "pk": 5,
     "fields": {
-      "location": "Оболонь",
-      "key": "location_5"
+      "location": "Оболонь"
     }
   },
   {
     "model": "crm.location",
     "pk": 6,
     "fields": {
-      "location": "Голосеевская",
-      "key": "location_6"
+      "location": "Голосеевская"
     }
   },
   {
     "model": "crm.location",
     "pk": 7,
     "fields": {
-      "location": "Теремки / Ипподром / ВДНГ",
-      "key": "location_7"
+      "location": "Теремки / Ипподром / ВДНГ"
     }
   },
   {
     "model": "crm.location",
     "pk": 8,
     "fields": {
-      "location": "Шулявка / Нивки / Берестейка",
-      "key": "location_8"
+      "location": "Шулявка / Нивки / Берестейка"
     }
   },
   {
     "model": "crm.location",
     "pk": 9,
     "fields": {
-      "location": "Отрадный / Соломенский",
-      "key": "location_9"
+      "location": "Отрадный / Соломенский"
     }
   },
   {
     "model": "crm.location",
     "pk": 10,
     "fields": {
-      "location": "Вокзальная / Университет / Льва Толстого",
-      "key": "location_10"
+      "location": "Вокзальная / Университет / Льва Толстого"
     }
   },
   {
     "model": "crm.location",
     "pk": 11,
     "fields": {
-      "location": "Куреневка / Сырец",
-      "key": "location_11"
+      "location": "Куреневка / Сырец"
     }
   },
   {
     "model": "crm.location",
     "pk": 12,
     "fields": {
-      "location": "Новобеличи",
-      "key": "location_12"
+      "location": "Новобеличи"
     }
   },
   {
     "model": "crm.location",
     "pk": 13,
     "fields": {
-      "location": "Кловская / Арсенальная",
-      "key": "location_13"
+      "location": "Кловская / Арсенальная"
     }
   }
 ]

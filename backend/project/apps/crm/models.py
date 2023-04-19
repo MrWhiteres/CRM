@@ -1,10 +1,14 @@
-from django.db.models import DO_NOTHING, ForeignKey, Model, CharField, DateTimeField, DateField, BooleanField
+from django.db.models import DO_NOTHING, ForeignKey, Model, CharField, DateTimeField, DateField, BooleanField, CASCADE
 
 from ..authorization.models import User
 
 
 class AllTime(Model):
     time = CharField(verbose_name='Рабочее время', max_length=20, db_index=True)
+
+    class Meta:
+        verbose_name = 'Рабочее время'
+        verbose_name_plural = 'Рабочие времена'
 
     def __str__(self):
         return self.time
@@ -70,52 +74,113 @@ class Clients(Model):
     date_update = DateTimeField(auto_now=True, verbose_name='Дата обновления данных')
     payed_date = DateField(verbose_name='Дата оплаты', blank=True, null=True)
 
+    def __str__(self) -> str:
+        return f"{self.name} - {self.phone_number}"
+
+    class Meta:
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
 
 class ClassAttendance(Model):
-    visit = BooleanField(default=False)
-    client = ForeignKey(Clients, on_delete=DO_NOTHING)
-    date = DateField(auto_now_add=True)
+    visit = BooleanField(default=False, verbose_name='Посещение')
+    client = ForeignKey(Clients, on_delete=DO_NOTHING, verbose_name='Клиент')
+    date = DateField(auto_now_add=True, verbose_name='Дата посещения')
+
+    def __str__(self) -> str:
+        return f"{self.client} - {self.date}"
+
+    class Meta:
+        verbose_name = 'Посещение'
+        verbose_name_plural = 'Посещения'
 
 
 class Location(Model):
     location = CharField(verbose_name='Место тренировки', max_length=255)
-    key = CharField(verbose_name='Значение', max_length=255)
+
+    def __str__(self) -> str:
+        return self.location
+
+    class Meta:
+        verbose_name = 'Место тренировки'
+        verbose_name_plural = 'Места тренировки'
 
 
 class Age(Model):
     age = CharField(verbose_name='Возрастная группа', max_length=255)
-    key = CharField(verbose_name='Значение', max_length=255)
+
+    def __str__(self) -> str:
+        return self.age
+
+    class Meta:
+        verbose_name = 'Возрастная группа'
+        verbose_name_plural = 'Возрастные группы'
 
 
 class Section(Model):
-    section = CharField(verbose_name='Тип секции', max_length=255)
-    key = CharField(verbose_name='Значение', max_length=255)
+    section = CharField(verbose_name='Тип секции', max_length=255, unique=True, db_index=True)
+    key = CharField(verbose_name='Значение',
+                    help_text='В случае добавления новой секции необходимо соблюдать формат ключей, для Йоги - "yoga_sec_ЧИСЛО", для Единоборств - "mat_sec_ЧИСЛО"',
+                    max_length=255, unique=True, db_index=True)
+
+    def __str__(self) -> str:
+        return self.section
+
+    class Meta:
+        verbose_name = 'Тип секции'
+        verbose_name_plural = 'Типы секций'
 
 
 class GroupType(Model):
     class_type = CharField(verbose_name='Название группы', max_length=255)
-    key = CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.class_type
+
+    class Meta:
+        verbose_name = 'Тип группы'
+        verbose_name_plural = 'Типы групп'
 
 
 class Days(Model):
     day = CharField(verbose_name='День', max_length=255)
-    key = CharField(verbose_name='Значение', max_length=255)
+
+    def __str__(self) -> str:
+        return self.day
+
+    class Meta:
+        verbose_name = 'День'
+        verbose_name_plural = 'Дни'
 
 
 class FormClient(Model):
-    location = CharField(verbose_name='Локации которые были выбраны', max_length=1000, blank=True, null=True)
-    visit_time = CharField(verbose_name='Время которое было выбрано', max_length=1000, blank=True, null=True)
-    section = CharField(verbose_name='Секции которое были выбраны', max_length=1000, blank=True, null=True)
-    client = ForeignKey(Clients, on_delete=DO_NOTHING)
-    age = CharField(verbose_name='Возрастная категория', max_length=100)
-    visit_day = CharField(verbose_name='Дни которое было выбрано', max_length=1000)
-    class_type = CharField(verbose_name='Тип занятий', max_length=100)
+    location = CharField(verbose_name='Локации которые были выбраны(ID)', max_length=1000, blank=True, null=True)
+    visit_time = CharField(verbose_name='Время которое было выбрано(ID)', max_length=1000, blank=True, null=True)
+    section = CharField(verbose_name='Секции которое были выбраны(ID)', max_length=1000, blank=True, null=True)
+    client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
+    age = CharField(verbose_name='Возрастная категория(ID)', max_length=100)
+    visit_day = CharField(verbose_name='Дни которое было выбрано(ID)', max_length=1000)
+    class_type = CharField(verbose_name='Тип занятий(ID)', max_length=100)
+
+    def __str__(self) -> str:
+        return f"Базовая форма для - {self.client.name} - {self.client.phone_number}"
+
+    class Meta:
+        verbose_name = 'Форма клиента'
+        verbose_name_plural = 'Формы клиентов'
 
 
 class OtherData(Model):
-    client = ForeignKey(Clients, on_delete=DO_NOTHING)
-    location = CharField(verbose_name='Локации которые были выбраны', max_length=1000, blank=True, null=True)
-    section = CharField(verbose_name='Секции которое были выбраны', max_length=1000, blank=True, null=True)
+    client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
+    location = CharField(verbose_name='Локации которые были выбраны(TEXT)', max_length=1000, blank=True, null=True)
+    section = CharField(verbose_name='Секции которое были выбраны(TEXT)', max_length=1000, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return f"Форма с нестандартными данными для - {self.client.name} - {self.client.phone_number}"
+
+    class Meta:
+        verbose_name = 'Форма с нестандартными данными'
+        verbose_name_plural = 'Формы с нестандартными данными'
 
 
 class CoachForClient(Model):
@@ -124,7 +189,21 @@ class CoachForClient(Model):
     group_type = CharField(verbose_name='Тип тренировки', max_length=255)
     client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
 
+    def __str__(self):
+        return f"Тренер - {self.coach.first_name} / Клиент {self.client.name}"
+
+    class Meta:
+        verbose_name = 'Тренер/Клиент'
+        verbose_name_plural = 'Тренеры/Клиенты'
+
 
 class NewClientCoach(Model):
     coach = ForeignKey(User, verbose_name='Тренер', on_delete=DO_NOTHING)
     client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
+
+    def __str__(self):
+        return f"Тренер - {self.coach.first_name} / Клиент {self.client.name}"
+
+    class Meta:
+        verbose_name = 'Тренер/Клиент (Временная таблица)'
+        verbose_name_plural = 'Тренеры/Клиенты (Временная таблица)'

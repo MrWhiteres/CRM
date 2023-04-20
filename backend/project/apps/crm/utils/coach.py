@@ -13,22 +13,19 @@ def get_clients_for_coach(user: User) -> list:
     client: CoachForClient
     return [dict(
         id=client.client.id,
-        first_name=client.client.name,
-        last_name=client.client.lastname,
+        fullname=client.client.fullname,
         phone_number=client.client.phone_number,
         payed_status=change_status(client.client.payed_status),
-        status=None
+        status=change_status(client.client.payed_status)
     ) for client in clients]
 
 
 def change_status(status: str) -> str:
-    for elements in Clients.PAID_STATUS:
-        if status in (value := list(elements)):
-            return value[-1]
+    return [elements[1] for element in Clients.PAID_STATUS if status in (elements := list(element))][0]
 
 
-def get_status_paid() -> tuple:
-    return Clients.PAID_STATUS
+def get_status_paid() -> list:
+    return [dict(label=list(element)[1], value=list(element)[0]) for element in Clients.PAID_STATUS]
 
 
 def clear_data(data: dict) -> dict:
@@ -44,25 +41,27 @@ def clear_data(data: dict) -> dict:
 def mark_visit_creation(data: dict, coach: User) -> None:
     client: dict
     time_correct = timezone.now().date()
-    for client in data['clients']:
-        if not (correct_client := check_client(client['phone_number'])):
-            correct_client = Clients.objects.create(
-                name=client['first_name'], lastname=client['last_name'], phone_number=client['phone_number'],
-                payed_status=return_payed_status(client['status']), status_operator=Clients.CHECKED_UPLOAD,
-                status_coach=Clients.CHECKED_UPLOAD
-            )
-            if correct_client.payed_status == 'paid':
-                correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
-            create_relationship(coach=coach, client=correct_client, visit_time=client['visit_time'],
-                                group_type=client['class_type'])
-            correct_client.status = correct_client.RECORDED
-            correct_client.save()
-        if correct_client.payed_status == correct_client.NEW_CLIENT:
-            correct_client.payed_status = return_payed_status(client['status'])
+    clients = [check_create_client(client, coach, time_correct) for client in data['clients']]
+    [create_visit(visit=data['exist'], client=data['client']) for data in clients]
+
+
+def check_create_client(client: dict, coach: User, time_correct: datetime) -> dict:
+    if not (correct_client := check_client(client['phone_number'])):
+        correct_client = Clients.objects.create(
+            fullname=client['fullname'], phone_number=client['phone_number'],
+            payed_status=return_payed_status(client['status']), status_operator=Clients.CHECKED_UPLOAD,
+            status_coach=Clients.CHECKED_UPLOAD
+        )
         if correct_client.payed_status == 'paid':
             correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
-        correct_client.save()
-        create_visit(visit=client['exist'], client=correct_client)
+        create_relationship(coach=coach, client=correct_client, visit_time=client['visit_time'],
+                            group_type=client['class_type'])
+        correct_client.status = correct_client.RECORDED
+    correct_client.payed_status = return_payed_status(client['status'])
+    if correct_client.payed_status == 'paid':
+        correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
+    correct_client.save()
+    return dict(client=correct_client, exist=client['exist'])
 
 
 def create_visit(visit: bool, client: Clients):
@@ -83,17 +82,8 @@ def check_client(phone_number) -> Clients | bool:
 
 
 def return_payed_status(data: str) -> str:
-    if data == 'first':
-        return Clients.FIRST
-    if data == 'full':
-        return Clients.PAID
-    if data == 'part':
-        return Clients.PART
-    if data == 'one_paid':
-        return Clients.ONE_PAID
-    if data == 'this_month':
-        return Clients.THIS_MONTH
-    return Clients.NOTPAID
+    status = [elements[1] for element in Clients.PAID_STATUS if data in (elements := list(element))][0]
+    return Clients.NOTPAID if not status else status
 
 
 def create_relationship(coach: User, client: Clients, visit_time: str, group_type: str) -> None:
@@ -138,8 +128,7 @@ def return_clients_list(data: QuerySet) -> list:
 def recreate_client_data(data: list) -> list:
     element: Clients
     return [dict(
-        name=element.name,
-        lastname=element.lastname,
+        fullname=element.fullname,
         phone_number=element.phone_number,
         **return_base_data(element),
         status=element.status_coach
@@ -205,7 +194,7 @@ def return_time() -> list:
     return [
         dict(
             title=time.time,
-            value=time.time
+            value=time.id
         ) for time in AllTime.objects.all()
     ]
 
@@ -215,6 +204,6 @@ def return_class_type() -> list:
     return [
         dict(
             title=class_type.class_type,
-            value=class_type.key
+            value=class_type.id
         ) for class_type in GroupType.objects.all()
     ]

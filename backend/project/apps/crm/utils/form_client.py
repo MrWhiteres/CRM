@@ -5,7 +5,7 @@ from ..models import Clients, FormClient, OtherData, AllTime, Location, Days, Ag
 def register_client(data: dict):
     if not check_client(data['phone_number']):
         Clients.objects.create(
-            name=data['name'], phone_number=data['phone_number'],
+            fullname=data['name'], phone_number=data['phone_number'],
             payed_status=Clients.NEW_CLIENT, status=Clients.NEW,
             status_coach=Clients.NOT_CHECKED, status_operator=Clients.NOT_CHECK
         ).save()

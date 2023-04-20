@@ -7,21 +7,20 @@
   <v-divider></v-divider>
 
   <v-list density="compact" nav>
-
-    <v-list-item v-if="['operator', 'admin'].includes(user.type)"
-                 prepend-icon="mdi-view-dashboard-outline " title="Таблица клиентов"
+    <v-list-item v-if="['Оператор', 'Администратор'].includes(user.type)"
+                 prepend-icon="mdi-view-dashboard-outline" title="Таблица клиентов"
                  value="Таблица клиентов" @click="this.$router.push({name: 'clients-all-list'})"/>
 
-    <v-list-item v-if="['coach', 'head_coach'].includes(user.type)"
-                 prepend-icon="mdi-view-dashboard" title="Таблица новых клиентов"
+    <v-list-item v-if="['Тренер', 'Старший тренер'].includes(user.type)"
+                 prepend-icon="mdi-view-dashboard-outline" title="Таблица новых клиентов"
                  value="Таблица новых клиентов" @click="this.$router.push({name: 'couch-new-client'})"/>
 
 
-    <v-list-item v-if="['coach', 'head_coach'].includes(user.type)"
+    <v-list-item v-if="['Тренер', 'Старший тренер'].includes(user.type)"
                  prepend-icon="mdi-view-dashboard" title="Таблица посещений"
                  value="Таблица" @click="this.$router.push({name: 'couch-table'})"/>
 
-    <v-list-item v-if="['operator', 'admin'].includes(user.type)"
+    <v-list-item v-if="['Оператор', 'Администратор'].includes(user.type)"
                  prepend-icon="mdi-view-dashboard" title="Таблица новых клиентов"
                  value="Таблица новых клиентов" @click="this.$router.push({name: 'client-list'})"/>
 
@@ -30,7 +29,7 @@
     <v-list-item prepend-icon="mdi-account-circle" title="Профиль" value="Профиль"
                  @click="this.$router.push({name: 'profile'})"/>
 
-    <v-list-item v-if="user.type === 'admin'" prepend-icon="mdi-account-circle-outline" title="Админ панель"
+    <v-list-item v-if="['Оператор', 'Администратор'].includes(user.type)" prepend-icon="mdi-account-circle-outline" title="Админ панель"
                  value="Админ панель"
                  @click="this.$router.push({name: 'profile'})"/>
   </v-list>

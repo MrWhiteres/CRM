@@ -400,7 +400,6 @@ const clear_data = async () => {
 const fetchData = async () => {
   try {
     const response = await axios.get('forms/')
-    console.log(response.data, 123)
     yogaType.value = response.data.yoga_type
     matrial_arts_type.value = response.data.matrial_arts_type
     visit_day.value = response.data.days

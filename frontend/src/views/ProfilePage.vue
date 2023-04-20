@@ -23,7 +23,7 @@
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-title v-text="'Номер телефона:'"/>
-                  <v-list-item-subtitle v-if="user.phone_number" :v-text="user.phone_number"/>
+                  <v-list-item-subtitle v-if="user.phone_number" v-text="user.phone_number"/>
                   <v-list-item-subtitle v-else v-text="`Не указан.`"/>
                   <v-divider class="border-opacity-100"/>
                 </v-list-item>

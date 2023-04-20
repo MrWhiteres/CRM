@@ -197,7 +197,6 @@ const getCurrentUserData = async () => {
     ) {
       store.commit('setUser', response.data)
     }
-    console.log(123123)
   } catch (error) {
   }
 }
@@ -230,7 +229,7 @@ const updateProfile = () => {
 }
 
 .v-title {
-  margin-top: -9%;
+  margin-top: -6%;
 }
 
 @media screen and (max-width: 800px) {

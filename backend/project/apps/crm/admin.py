@@ -62,13 +62,13 @@ class DaysAdmin(ModelAdmin):
 @register(Clients)
 class ClientsAdmin(ModelAdmin):
     fieldsets = (
-        ('Базовая информация:', {'fields': ('name', 'lastname', 'phone_number')}),
+        ('Базовая информация:', {'fields': ('fullname', 'phone_number')}),
         ('Статусы пользователя:',
          {'fields': ('status', 'status_operator', 'status_coach', 'payed_status', 'payed_date')}),
         ('Дата обновление и добавление клиента:', {'fields': ('date_added', 'date_update')}),
     )
     readonly_fields = ('date_added', 'date_update')
-    list_display = ('id', 'name', 'lastname', 'phone_number', 'status', 'date_added')
+    list_display = ('id', 'fullname', 'phone_number', 'status', 'date_added')
     model = Clients
 
 

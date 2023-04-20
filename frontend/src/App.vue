@@ -1,44 +1,48 @@
 <template>
   <v-responsive>
-    <v-app>
-      <div>
-        <div v-if="loading" class="loader-container">
-          <div class="loader-inner">
-            <v-progress-circular :size="64" :width="7" color="primary" indeterminate></v-progress-circular>
-          </div>
-        </div>
-
-        <div v-else>
-          <v-app-bar app>
-            <v-app-bar-nav-icon :icon="drawer ? 'mdi-menu' : 'mdi-menu-open'" v-if="height === 220"
-                                @click="drawer = !drawer"/>
-            <tab-auth v-if="store.state.user && height > 220"/>
-            <tab-base v-if="!store.state.user && height > 220"/>
-          </v-app-bar>
-          <v-navigation-drawer
-            v-model="drawer"
-            app
-            temporary
-          >
-            <left-menu-auth v-if="store.state.user"/>
-            <left-menu-base v-else/>
-
-            <div class="pa-2">
-              <v-btn v-if="store.state.user" block @click="logout">
-                Выход
-              </v-btn>
+    <n-message-provider>
+      <n-dialog-provider>
+        <v-app>
+          <div>
+            <div v-if="loading" class="loader-container">
+              <div class="loader-inner">
+                <v-progress-circular :size="64" :width="7" color="primary" indeterminate></v-progress-circular>
+              </div>
             </div>
-          </v-navigation-drawer>
-          <v-main>
-            <v-responsive>
-              <v-container fluid class="v-container">
-                <router-view/>
-              </v-container>
-            </v-responsive>
-          </v-main>
-        </div>
-      </div>
-    </v-app>
+
+            <div v-else>
+              <v-app-bar app>
+                <v-app-bar-nav-icon v-if="height === 220" :icon="drawer ? 'mdi-menu' : 'mdi-menu-open'"
+                                    @click="drawer = !drawer"/>
+                <tab-auth v-if="store.state.user && height > 220"/>
+                <tab-base v-if="!store.state.user && height > 220"/>
+              </v-app-bar>
+              <v-navigation-drawer
+                v-model="drawer"
+                app
+                temporary
+              >
+                <left-menu-auth v-if="store.state.user"/>
+                <left-menu-base v-else/>
+
+                <div class="pa-2">
+                  <v-btn v-if="store.state.user" block @click="logout">
+                    Выход
+                  </v-btn>
+                </div>
+              </v-navigation-drawer>
+              <v-main>
+                <v-responsive>
+                  <v-container class="v-container" fluid>
+                    <router-view/>
+                  </v-container>
+                </v-responsive>
+              </v-main>
+            </div>
+          </div>
+        </v-app>
+      </n-dialog-provider>
+    </n-message-provider>
   </v-responsive>
 </template>
 

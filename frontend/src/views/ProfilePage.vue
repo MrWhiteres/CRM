@@ -1,6 +1,8 @@
 <template>
   <v-card class="card-base" elevation="20">
-    <v-card-title>Профиль пользователя: {{ user.full_name }}</v-card-title>
+    <v-card-title v-if="height > 220">Профиль пользователя: {{ user.full_name }}</v-card-title>
+    <v-card-title v-if="height === 220">Профиль пользователя:</v-card-title>
+    <v-card-title v-if="height === 220">{{ user.full_name }}</v-card-title>
     <v-card-text>
       <v-row>
         <v-col cols="12" md="3">
@@ -49,13 +51,35 @@
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import axios from "axios";
+import {computed} from "vue";
+import {useDisplay} from "vuetify";
 
 export default {
   name: 'ProfilePage',
   setup() {
+    const {name} = useDisplay()
+    const height = computed(() => {
+      switch (name.value) {
+        case 'xs':
+          return 220
+        case 'sm':
+          return 400
+        case 'md':
+          return 500
+        case 'lg':
+          return 600
+        case 'xl':
+          return 800
+        case 'xxl':
+          return 1200
+      }
+
+      return undefined
+    })
     return {
       router: useRouter(),
       store: useStore(),
+      height
     }
   },
   data() {

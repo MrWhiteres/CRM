@@ -3,7 +3,7 @@
     <v-sheet style="display: grid; place-items: center">
       <v-card class="v-card-base" elevation="15" style="padding: 15px">
         <v-form @submit.prevent="submitForm">
-          <v-card elevation="10" class="header-card">
+          <v-card class="header-card" elevation="10">
             <v-card-title class="text-center text-caption">
               Записаться на тренировки
             </v-card-title>
@@ -13,7 +13,7 @@
               Контактные номера: +380971916680, +380996374872, +380994687607
             </v-card-text>
           </v-card>
-          <v-card elevation="10" class="mb-4">
+          <v-card class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Персональная информация:
               <n-gradient-text type="error">
                 *
@@ -35,15 +35,15 @@
                 :counter="true"
                 :maxlength="50"
                 :minlength="3"
-                clearable
                 :rules="[rules.requiredField, rules.minNumberLength, rules.isNumber]"
+                clearable
                 label="Номер телефона"
                 placeholder="380778899555"
                 variant="underlined"
               />
             </v-card-text>
           </v-card>
-          <v-card elevation="10" class="mb-4">
+          <v-card class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Выберите тип тренировок:
               <n-gradient-text type="error">
                 *
@@ -52,21 +52,21 @@
             <v-card-text class="text-center text-caption">
               <v-btn-toggle
                 v-model="formClient.choice"
-                rounded="x10"
-                variant="outlined"
                 class="text-caption mb-4"
                 color="blue-accent-4"
                 group
+                rounded="x10"
+                variant="outlined"
                 @click="clear_data"
               >
                 <v-btn
-                  class="text-caption" value="yoga"
-                  round
+                  class="text-caption" round
+                  value="yoga"
                 >
                   Йога
                 </v-btn>
                 <v-btn class="text-caption"
-                       value="martialArts" round
+                       round value="martialArts"
                 >
                   Единоборства
                 </v-btn>
@@ -74,7 +74,7 @@
             </v-card-text>
           </v-card>
 
-          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+          <v-card :disabled="!formClient.choice" class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Выберите тип секции:
               <n-gradient-text type="error">
                 *
@@ -86,20 +86,20 @@
             <v-card-text>
               <template v-if="formClient.choice === 'yoga'">
                 <v-checkbox
+                  v-for="(yoga, index) in yogaType"
+                  :key="index"
                   v-model="formClient.yoga_type"
                   :label="yoga.title"
                   :value="yoga.value"
                   color="primary"
-                  v-for="(yoga, index) in yogaType"
-                  :key="index"
                 />
                 <v-select
                   v-model="formClient.yoga_type"
                   :items="yogaType"
+                  chips
+                  label="Выбранные секции:"
                   readonly
                   variant="underlined"
-                  label="Выбранные секции:"
-                  chips
                 />
                 <v-text-field
                   v-model="formClient.other_yoga_type"
@@ -112,20 +112,20 @@
               </template>
               <template v-else-if="formClient.choice === 'martialArts'">
                 <v-checkbox
+                  v-for="(matrial_arts, index) in matrial_arts_type"
+                  :key="index"
                   v-model="formClient.matrial_arts_type"
                   :label="matrial_arts.title"
                   :value="matrial_arts.value"
                   color="primary"
-                  v-for="(matrial_arts, index) in matrial_arts_type"
-                  :key="index"
                 />
                 <v-select
                   v-model="formClient.matrial_arts_type"
                   :items="matrial_arts_type"
+                  chips
+                  label="Выбранные секции:"
                   readonly
                   variant="underlined"
-                  label="Выбранные секции:"
-                  chips
                 />
                 <v-text-field
                   v-model="formClient.other_matrial_arts_type"
@@ -144,7 +144,7 @@
             </v-card-text>
           </v-card>
 
-          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+          <v-card :disabled="!formClient.choice" class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Выберите тип занятий:
               <n-gradient-text type="error">
                 *
@@ -164,7 +164,7 @@
             </v-card-text>
           </v-card>
 
-          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+          <v-card :disabled="!formClient.choice" class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Возрастная категория занятий:
               <n-gradient-text type="error">
                 *
@@ -184,7 +184,7 @@
             </v-card-text>
           </v-card>
 
-          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+          <v-card :disabled="!formClient.choice" class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Выберите локацию для тренировок:
               <n-gradient-text type="error">
                 *
@@ -195,7 +195,7 @@
             </v-card-subtitle>
             <v-card-text>
               <v-row>
-                <v-col v-for="(loc, index) in location" :key="index" cols="5">
+                <v-col v-for="(loc, index) in location" :key="index" :cols="height > 500 ? 4 : height > 220 ? 6 : 7">
                   <v-checkbox
                     v-model="formClient.training_location"
                     :label="loc.title"
@@ -207,10 +207,10 @@
               <v-select
                 v-model="formClient.training_location"
                 :items="location"
+                chips
+                label="Выбранные локации для тренировок:"
                 readonly
                 variant="underlined"
-                label="Выбранные локации для тренировок:"
-                chips
               />
               <v-text-field
                 v-model="formClient.other_location"
@@ -222,7 +222,7 @@
               />
             </v-card-text>
           </v-card>
-          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
+          <v-card :disabled="!formClient.choice" class="mb-4" elevation="10">
             <v-card-title class="text-center text-caption">Выберите день посещения:
               <n-gradient-text type="error">
                 *
@@ -233,7 +233,7 @@
             </v-card-subtitle>
             <v-card-text>
               <v-row>
-                <v-col v-for="(day, index) in visit_day" :key="index" cols="5">
+                <v-col v-for="(day, index) in visit_day" :key="index" :cols="height > 220 ? 6 : 12">
                   <v-checkbox
                     v-model="formClient.visit_day"
                     :label="day.title"
@@ -245,15 +245,15 @@
               <v-select
                 v-model="formClient.visit_day"
                 :items="visit_day"
+                chips
+                label="Выбранные дни тренировок:"
                 readonly
                 variant="underlined"
-                label="Выбранные дни тренировок:"
-                chips
               />
             </v-card-text>
           </v-card>
-          <v-card elevation="10" :disabled="!formClient.choice" class="mb-4">
-            <v-card-title class="text-center text-caption">Выберите день посещения:
+          <v-card :disabled="!formClient.choice" class="mb-4" elevation="10">
+            <v-card-title class="text-center text-caption">Выберите время посещения:
               <n-gradient-text type="error">
                 *
               </n-gradient-text>
@@ -263,7 +263,7 @@
             </v-card-subtitle>
             <v-card-text>
               <v-row>
-                <v-col v-for="(tm, index) in time" :key="index" cols="3">
+                <v-col v-for="(tm, index) in time" :key="index" :cols="height > 500 ? 2 : height > 220 ? 3 : 6">
                   <v-checkbox
                     v-model="formClient.training_time"
                     :label="tm.title"
@@ -275,17 +275,17 @@
               <v-select
                 v-model="formClient.training_time"
                 :items="time"
+                chips
+                label="Выбранное время для тренировок:"
                 readonly
                 variant="underlined"
-                label="Выбранное время для тренировок:"
-                chips
               />
             </v-card-text>
           </v-card>
 
-          <v-card elevation="10" class="mb-4">
+          <v-card class="mb-4" elevation="10">
             <v-card-text v-if="allert || base_allert">
-              <v-alert variant="outlined" type="info" v-if="allert || base_allert">
+              <v-alert v-if="allert || base_allert" type="info" variant="outlined">
                 <p
                   v-if="!formClient.name ||  !formClient.phone_number || formClient.name.length < 3 || formClient.phone_number.length < 10 || !Boolean(Number(formClient.phone_number))">
                   Ошибка в полях Име и Телефон!</p>
@@ -336,22 +336,38 @@
                 </n-ul>
               </v-alert>
             </v-card-text>
-            <v-card-actions style="display: grid; place-items: center" class="mt-2 mb-2">
-              <v-btn :disabled="allert" type="submit" block variant="outlined"
-                     class="text-success text-caption text-capitalize">
+            <v-card-actions class="mt-2 mb-2" style="display: grid; place-items: center">
+              <v-btn :disabled="allert" block class="text-success text-caption text-capitalize" type="submit"
+                     variant="outlined">
                 Отправить форму
               </v-btn>
             </v-card-actions>
           </v-card>
         </v-form>
+        <div class="text-center">
+          <v-dialog
+            v-model="dialog"
+            width="auto"
+          >
+            <v-card>
+              <v-card-text>
+                Форма успешно заполнена и отправлена!
+              </v-card-text>
+              <v-card-actions>
+                <v-btn block color="primary" @click="dialog = false">Подтвердить</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
       </v-card>
     </v-sheet>
   </v-responsive>
 </template>
 
 <script setup>
-import {ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import axios from "axios";
+import {useDisplay} from "vuetify";
 
 const yogaType = ref([])
 const matrial_arts_type = ref([])
@@ -362,6 +378,7 @@ const ages = ref([])
 const time = ref([])
 const allert = ref(true)
 const base_allert = ref(true)
+const dialog = ref(false)
 const rules = ref(
   {
     requiredField: value => !!value || 'Обязательное поле.',
@@ -376,6 +393,26 @@ const rules = ref(
     }
   }
 )
+const {name} = useDisplay()
+const height = computed(() => {
+  switch (name.value) {
+    case 'xs':
+      return 220
+    case 'sm':
+      return 400
+    case 'md':
+      return 500
+    case 'lg':
+      return 600
+    case 'xl':
+      return 800
+    case 'xxl':
+      return 1200
+  }
+
+  return undefined
+})
+
 const formClient = ref({
   choice: false,
   name: '',
@@ -392,6 +429,21 @@ const formClient = ref({
   other_matrial_arts_type: '',
 })
 const clear_data = async () => {
+  formClient.value.matrial_arts_type = []
+  formClient.value.yoga_type = []
+  formClient.value.other_yoga_type = ''
+  formClient.value.other_matrial_arts_type = ''
+}
+const clear_all_data = async () => {
+  formClient.value.choice = false
+  formClient.value.name = ''
+  formClient.value.phone_number = ''
+  formClient.value.class_type = ''
+  formClient.value.training_location = []
+  formClient.value.other_location = ''
+  formClient.value.training_time = []
+  formClient.value.visit_day = []
+  formClient.value.age = ''
   formClient.value.matrial_arts_type = []
   formClient.value.yoga_type = []
   formClient.value.other_yoga_type = ''
@@ -416,6 +468,8 @@ fetchData()
 const submitForm = async () => {
   try {
     await axios.post('forms/', {data: formClient.value})
+    dialog.value = true
+    // await clear_all_data()
   } catch (_) {
 
   }

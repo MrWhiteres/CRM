@@ -29,9 +29,6 @@
     <v-list-item prepend-icon="mdi-account-circle" title="Профиль" value="Профиль"
                  @click="this.$router.push({name: 'profile'})"/>
 
-    <v-list-item v-if="['Оператор', 'Администратор'].includes(user.type)" prepend-icon="mdi-account-circle-outline" title="Админ панель"
-                 value="Админ панель"
-                 @click="this.$router.push({name: 'profile'})"/>
   </v-list>
 </template>
 

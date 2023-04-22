@@ -1,4 +1,8 @@
-from django.db.models import DO_NOTHING, ForeignKey, Model, CharField, DateTimeField, DateField, BooleanField, CASCADE
+from django.db.models import (
+    DO_NOTHING, ForeignKey, Model, CharField,
+    DateTimeField, DateField, BooleanField, CASCADE,
+    ManyToManyField
+)
 
 from ..authorization.models import User
 
@@ -83,7 +87,7 @@ class Clients(Model):
 
 class ClassAttendance(Model):
     visit = BooleanField(default=False, verbose_name='Посещение')
-    client = ForeignKey(Clients, on_delete=DO_NOTHING, verbose_name='Клиент')
+    client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
     date = DateField(auto_now_add=True, verbose_name='Дата посещения')
 
     def __str__(self) -> str:
@@ -153,13 +157,13 @@ class Days(Model):
 
 
 class FormClient(Model):
-    location = CharField(verbose_name='Локации которые были выбраны(ID)', max_length=1000, blank=True, null=True)
-    visit_time = CharField(verbose_name='Время которое было выбрано(ID)', max_length=1000, blank=True, null=True)
-    section = CharField(verbose_name='Секции которое были выбраны(ID)', max_length=1000, blank=True, null=True)
+    location = ManyToManyField(Location, verbose_name='Локации которые были выбраны(ID)', blank=True)
+    visit_time = ManyToManyField(AllTime, verbose_name='Время которое было выбрано(ID)', blank=True)
+    section = ManyToManyField(Section, verbose_name='Секции которые были выбраны(ID)', blank=True)
     client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
-    age = CharField(verbose_name='Возрастная категория(ID)', max_length=100)
-    visit_day = CharField(verbose_name='Дни которое было выбрано(ID)', max_length=1000)
-    class_type = CharField(verbose_name='Тип занятий(ID)', max_length=100)
+    age = ForeignKey(Age, verbose_name='Возрастная категория(ID)', on_delete=CASCADE)
+    visit_day = ManyToManyField(Days, verbose_name='Дни которые были выбраны(ID)')
+    class_type = ForeignKey(GroupType, verbose_name='Тип занятий(ID)', on_delete=CASCADE)
 
     def __str__(self) -> str:
         return f"Базовая форма для - {self.client.fullname} - {self.client.phone_number}"
@@ -171,8 +175,8 @@ class FormClient(Model):
 
 class OtherData(Model):
     client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
-    location = CharField(verbose_name='Локации которые были выбраны(TEXT)', max_length=1000, blank=True, null=True)
-    section = CharField(verbose_name='Секции которое были выбраны(TEXT)', max_length=1000, blank=True, null=True)
+    location = ManyToManyField(Location, verbose_name='Локации которые были выбраны(TEXT)', blank=True)
+    section = ManyToManyField(Section, verbose_name='Секции которое были выбраны(TEXT)', blank=True)
 
     def __str__(self) -> str:
         return f"Форма с нестандартными данными для - {self.client.fullname} - {self.client.phone_number}"
@@ -183,10 +187,12 @@ class OtherData(Model):
 
 
 class CoachForClient(Model):
-    coach = ForeignKey(User, verbose_name='Тренер', on_delete=DO_NOTHING)
-    visit_time = CharField(verbose_name='Время посещения тренировки с тренером', max_length=255)
-    group_type = CharField(verbose_name='Тип тренировки', max_length=255)
-    client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
+    coach = ForeignKey(User, verbose_name='Тренер', on_delete=CASCADE)
+    visit_time = ManyToManyField(AllTime, verbose_name='Время посещения тренировки с тренером')
+    visit_day = ManyToManyField(Days, verbose_name='Дни посещения тренировки с тренером')
+    age = ForeignKey(Age, verbose_name='Возрастная категория', on_delete=CASCADE)
+    group_type = ForeignKey(GroupType, verbose_name='Тип тренировки', on_delete=CASCADE)
+    client = ForeignKey(Clients, verbose_name='Клиент', on_delete=CASCADE)
 
     def __str__(self):
         return f"Тренер - {self.coach.first_name} / Клиент {self.client.fullname}"

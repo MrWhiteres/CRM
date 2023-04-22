@@ -26,10 +26,6 @@
            value="3" @click="this.$router.push({name: 'client-list'})">
       Таблица новых клиентов
     </v-tab>
-    <v-tab v-if="['Оператор', 'Администратор'].includes(user.type)"
-           value="Админ панель"
-           @click="this.$router.push({name: 'profile'})">Админ панель
-    </v-tab>
   </v-tabs>
   <v-spacer/>
   <v-divider class="border-opacity-100" vertical/>

@@ -49,10 +49,15 @@ import {useStore} from "vuex";
 
 const store = useStore()
 const active_tab = ref(localStorage.getItem('active_tab' || null))
+const user = ref(store.state.user)
+setInterval(() => {
+  if (user.value !== store.state.user) {
+    user.value = store.state.user
+  }
+})
 watch(active_tab, async (newValue) => {
   localStorage.setItem('active_tab', newValue)
 })
-const user = store.state.user
 const logout = async () => {
   localStorage.clear();
   store.commit('clearState')

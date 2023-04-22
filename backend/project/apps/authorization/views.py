@@ -76,6 +76,7 @@ class UserDataApi(RetrieveAPIView):
             data_serializer = serializer(data=data)
             if data_serializer.is_valid():
                 return {**data_serializer.validated_data}
+
         return False
 
     def get(self, request: Request, *args, **kwargs) -> JsonResponse:
@@ -84,6 +85,7 @@ class UserDataApi(RetrieveAPIView):
 
     def post(self, request: Request, *args, **kwargs) -> JsonResponse:
         data = self.serialize_data(data=clear_data(request.data))
+        print(data)
         update_user_data(data, request.user)
         return JsonResponse(data={}, status=HTTP_200_OK)
 

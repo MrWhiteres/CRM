@@ -25,16 +25,16 @@ class ImageSerializer(Serializer):
 
 class UserDataSerializer(Serializer):
     email = EmailField(required=True, min_length=5, max_length=50)
-    first_name = CharField(required=True, min_length=5, max_length=50)
-    last_name = CharField(required=True, min_length=5, max_length=50)
-    full_name = CharField(required=True, min_length=10, max_length=100)
+    first_name = CharField(required=True, max_length=50)
+    last_name = CharField(required=True, max_length=50)
+    full_name = CharField(required=True, max_length=100)
     image = BooleanField(required=False)
     phone_number = CharField(required=False, min_length=5, allow_null=True)
     type = CharField(required=True)
 
 
 class EditProfileSerializer(Serializer):
-    first_name = CharField(required=False, min_length=5, max_length=50)
-    last_name = CharField(required=False, min_length=5, max_length=50)
+    first_name = CharField(required=False, max_length=50)
+    last_name = CharField(required=False, max_length=50)
     image = ImageField(required=False)
     phone_number = CharField(required=False, min_length=10, max_length=15)

@@ -67,15 +67,14 @@ class Clients(Model):
     status_coach = CharField(verbose_name='Статус проверки тренера', choices=COACH_STATUS, default=NOT_CHECKED,
                              max_length=255)
     payed_status = CharField(choices=PAID_STATUS, default=NOTPAID, verbose_name='Статус оплаты', max_length=255)
-    name = CharField(verbose_name='Имя', max_length=100, blank=True, null=True)
-    lastname = CharField(verbose_name='Фамилия', max_length=100, blank=True, null=True)
+    fullname = CharField(verbose_name='Фамилия Имя', max_length=100, blank=True, null=True)
     phone_number = CharField(verbose_name='Номер телефона', max_length=100, unique=True)
     date_added = DateTimeField(auto_now_add=True, verbose_name='Дата добавления клиента')
     date_update = DateTimeField(auto_now=True, verbose_name='Дата обновления данных')
     payed_date = DateField(verbose_name='Дата оплаты', blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.name} - {self.phone_number}"
+        return f"{self.fullname} - {self.phone_number}"
 
     class Meta:
         verbose_name = 'Клиент'
@@ -163,7 +162,7 @@ class FormClient(Model):
     class_type = CharField(verbose_name='Тип занятий(ID)', max_length=100)
 
     def __str__(self) -> str:
-        return f"Базовая форма для - {self.client.name} - {self.client.phone_number}"
+        return f"Базовая форма для - {self.client.fullname} - {self.client.phone_number}"
 
     class Meta:
         verbose_name = 'Форма клиента'
@@ -176,7 +175,7 @@ class OtherData(Model):
     section = CharField(verbose_name='Секции которое были выбраны(TEXT)', max_length=1000, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"Форма с нестандартными данными для - {self.client.name} - {self.client.phone_number}"
+        return f"Форма с нестандартными данными для - {self.client.fullname} - {self.client.phone_number}"
 
     class Meta:
         verbose_name = 'Форма с нестандартными данными'
@@ -190,7 +189,7 @@ class CoachForClient(Model):
     client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
 
     def __str__(self):
-        return f"Тренер - {self.coach.first_name} / Клиент {self.client.name}"
+        return f"Тренер - {self.coach.first_name} / Клиент {self.client.fullname}"
 
     class Meta:
         verbose_name = 'Тренер/Клиент'
@@ -202,7 +201,7 @@ class NewClientCoach(Model):
     client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
 
     def __str__(self):
-        return f"Тренер - {self.coach.first_name} / Клиент {self.client.name}"
+        return f"Тренер - {self.coach.first_name} / Клиент {self.client.fullname}"
 
     class Meta:
         verbose_name = 'Тренер/Клиент (Временная таблица)'

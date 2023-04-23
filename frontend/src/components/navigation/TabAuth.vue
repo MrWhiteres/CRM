@@ -54,10 +54,9 @@ setInterval(() => {
 watch(active_tab, async (newValue) => {
   localStorage.setItem('active_tab', newValue)
 })
-const logout = async () => {
+const logout = () => {
   localStorage.clear();
   store.commit('clearState')
-  await router.push({name: 'auth'});
 }
 </script>
 

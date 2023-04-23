@@ -93,10 +93,6 @@ def return_base_and_other_data(data: dict) -> dict:
     data_returned['section'] += [element.section for element in data['other_data']['section']]
     data_returned['visit_time'] = [element.time for element in data['form_data']['visit_time']]
     data_returned['visit_day'] = [element.day for element in data['form_data']['visit_day']]
-    data_returned['location'] = convert_list_to_string(data_returned['location'])
-    data_returned['section'] = convert_list_to_string(data_returned['section'])
-    data_returned['visit_time'] = convert_list_to_string(data_returned['visit_time'])
-    data_returned['visit_day'] = convert_list_to_string(data_returned['visit_day'])
     data_returned['class_type'] = return_class_type(data['form_data']['class_type'])
     data_returned['age'] = return_age(data['form_data']['age'])
     del data['form_data']['location']

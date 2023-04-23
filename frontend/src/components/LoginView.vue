@@ -184,6 +184,7 @@ export default {
     async handleLoginSuccessful(data) {
       this.$store.commit('setAccess', data.access);
       this.$store.commit('setRefresh', data.refresh);
+      this.$store.commit('setLogout', true);
       localStorage.setItem('refresh', data.refresh);
       this.loading = false
       await this.router.push({name: 'profile'})

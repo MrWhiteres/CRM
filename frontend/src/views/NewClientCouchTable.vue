@@ -185,7 +185,6 @@ export default {
         this.clients = []
         this.loading_skeleton = true;
         const response = await axios.get("new-clients/");
-        console.log(response);
         this.clients = response.data.elements.map((client) => ({
           ...client,
           details: client.details || [],
@@ -193,7 +192,6 @@ export default {
         this.itemsPerPage = response.data.elements.length;
         this.loading_skeleton = false;
       } catch (_) {
-        console.log(_);
         this.loading_skeleton = false;
       }
     },

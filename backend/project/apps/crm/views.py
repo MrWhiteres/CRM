@@ -14,9 +14,9 @@ from .serializers import (
 from .utils.coach import (
     get_clients_for_coach, get_status_paid,
     clear_data, mark_visit_creation,
-    return_time, new_clients, create_new_clients_coach, return_class_type
+    return_time, new_clients, create_new_clients_coach,
+    return_class_type, return_day, return_age
 )
-
 from .utils.form_client import register_client, clean_data, get_form_data
 from .utils.operators import (
     get_all_new_clients, get_operator_client_status,
@@ -48,8 +48,15 @@ class CoachClients(RetrieveUpdateDestroyAPIView, CreateAPIView):
         status = get_status_paid()
         work_time = return_time()
         class_type = return_class_type()
-        return JsonResponse(data=dict(clients=data, status_paid=status, time=work_time, class_type=class_type),
-                            status=HTTP_200_OK)
+        visit_day = return_day()
+        ages = return_age()
+        return JsonResponse(
+            data=dict(
+                clients=data, status_paid=status, time=work_time,
+                class_type=class_type, visit_day=visit_day,
+                ages=ages
+            ),
+            status=HTTP_200_OK)
 
     def post(self, request, *args, **kwargs) -> JsonResponse:
         mark_visit_creation(clear_data(self.serializers_data(request.data)), request.user)

@@ -1,4 +1,7 @@
-from .coach import check_client
+from django.db import IntegrityError
+
+from . import check_client
+from .operators import return_location
 from ..models import Clients, FormClient, OtherData, AllTime, Location, Days, Age, GroupType, Section
 
 
@@ -14,35 +17,116 @@ def register_client(data: dict):
     data_other: dict = dict(client=client)
 
     if loc := data.get('training_location'):
-        data_base['location'] = str(loc)
+        data_base['location'] = return_location(loc)
     if loc := data.get('other_location'):
-        data_other['location'] = str(loc)
+        data_other['location'] = create_location(loc)
 
-    data_base['visit_time'] = str(data['training_time'])
+    data_base['visit_time'] = return_time_by_id(data['training_time'])
 
     if sec := data.get('matrial_arts_type') or (sec_2 := data.get('yoga_type')):
-        data_base['section'] = str(sec) or str(sec_2)
+        section = sec or sec_2
+        data_base['section'] = return_section_by_list(section)
     if sec := data.get('other_matrial_arts_type') or (sec_2 := data.get('other_yoga_type')):
-        data_other['section'] = str(sec) or str(sec_2)
+        data_other['section'] = create_section(sec, data['choice']) or create_section(sec_2, data['choice'])
 
-    data_base['age'] = data['age']
-    data_base['visit_day'] = str(data['visit_day'])
-    data_base['class_type'] = str(data['class_type'])
+    data_base['age'] = return_age(data['age'])
+    data_base['visit_day'] = data['visit_day']
+    data_base['class_type'] = return_group_type(data['class_type'])
 
     dict_filter(data_base, FormClient)
     dict_filter(data_other, OtherData)
 
 
+def return_location(data: list) -> list:
+    return [
+        element
+        for element in Location.objects.filter(id__in=data)
+    ]
+
+
+def return_age(data: int) -> Age:
+    return Age.objects.get(id=data)
+
+
+def return_group_type(data: int) -> GroupType:
+    return GroupType.objects.get(id=data)
+
+
+def create_section(data: str, key: str) -> list:
+    key = 'yoga_sec_' if key == 'yoga' else 'mat_sec_'
+    try:
+        return [Section.objects.get(section=data)]
+    except Section.DoesNotExist:
+        return sub_create_section(data, key)
+
+
+def sub_create_section(data: str, key: str) -> list:
+    iteration = 1
+    while True:
+        try:
+            section = Section.objects.create(section=data, key=f'{key}{iteration}')
+            section.save()
+            return [section]
+        except IntegrityError:
+            iteration += 1
+
+
+def return_section_by_list(data: list) -> list:
+    return [
+        element
+        for element in Section.objects.filter(key__in=data)
+    ]
+
+
+def return_time_by_id(data: list) -> list:
+    return [
+        element
+        for element in AllTime.objects.filter(id__in=data)
+    ]
+
+
+def create_location(data: str) -> list:
+    try:
+        return [Location.objects.get(location=data)]
+    except Location.DoesNotExist:
+        location = Location.objects.create(location=data)
+        location.save()
+        return [location]
+
+
 def dict_filter(dict_obj: dict, model: FormClient or OtherData) -> None:
-    for val in dict_obj.values():
-        if isinstance(val, Clients) or not val or not len(val) > 1:
+    for key, value in dict_obj.items():
+        if key == 'clients' or type(value) == Clients or len(value) == 0:
             continue
         return create_form(model, dict_obj)
     return None
 
 
 def create_form(model: FormClient or OtherData, data: dict):
-    model.objects.create(**data).save()
+    if model == FormClient:
+        model = model.objects.create(client=data['client'], age=data['age'], class_type=data['class_type'])
+        if 'location' in data:
+            for location in data['location']:
+                model.location.add(location)
+        if 'visit_time' in data:
+            for visit_time in data['visit_time']:
+                model.visit_time.add(visit_time)
+        if 'visit_day' in data:
+            for visit_day in data['visit_day']:
+                model.visit_day.add(visit_day)
+        if 'section' in data:
+            for section in data['section']:
+                model.section.add(section)
+        model.save()
+    if model == OtherData:
+        model = model.objects.create(client=data['client'])
+        if 'location' in data:
+            for location in data['location']:
+                model.location.add(location)
+        if 'section' in data:
+            for section in data['section']:
+                model.section.add(section)
+        model.save()
 
 
 def clean_data(data: dict) -> dict:

@@ -3,8 +3,9 @@ from datetime import datetime
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from .operators import return_base_data
-from ..models import CoachForClient, Clients, ClassAttendance, NewClientCoach, AllTime, GroupType
+from . import check_client
+from .operators import return_client_data
+from ..models import CoachForClient, Clients, ClassAttendance, NewClientCoach, AllTime, GroupType, Days, Age
 from ...authorization.models import User
 
 
@@ -54,8 +55,11 @@ def check_create_client(client: dict, coach: User, time_correct: datetime) -> di
         )
         if correct_client.payed_status == 'paid':
             correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
-        create_relationship(coach=coach, client=correct_client, visit_time=client['visit_time'],
-                            group_type=client['class_type'])
+        create_relationship(
+            coach=coach, client=correct_client,
+            visit_time=client['visit_time'], visit_day=client['visit_day'],
+            group_type=client['class_type'], age=client['age']
+        )
         correct_client.status = correct_client.RECORDED
     correct_client.payed_status = return_payed_status(client['status'])
     if correct_client.payed_status == 'paid':
@@ -74,29 +78,52 @@ def create_visit(visit: bool, client: Clients):
         ClassAttendance.objects.create(visit=visit, client=client).save()
 
 
-def check_client(phone_number) -> Clients | bool:
-    try:
-        return Clients.objects.get(phone_number=phone_number)
-    except Clients.DoesNotExist:
-        return False
-
-
 def return_payed_status(data: str) -> str:
-    status = [elements[1] for element in Clients.PAID_STATUS if data in (elements := list(element))][0]
+    status = [elements[0] for element in Clients.PAID_STATUS if data in (elements := list(element))][0]
     return Clients.NOTPAID if not status else status
 
 
-def create_relationship(coach: User, client: Clients, visit_time: str, group_type: str) -> None:
+def create_relationship(
+        coach: User, client: Clients,
+        visit_time: list, group_type: int,
+        visit_day: list, age: int
+) -> None:
     try:
-        CoachForClient.objects.get(coach=coach, client=client,
-                                   visit_time=visit_time,
-                                   group_type=group_type)
-    except CoachForClient.DoesNotExist:
-        CoachForClient.objects.create(
+        model = CoachForClient.objects.get(
             coach=coach, client=client,
-            visit_time=visit_time,
-            group_type=group_type
-        ).save()
+            group_type=return_group_type_by_id(group_type),
+            age=return_age_by_id(age)
+        )
+    except CoachForClient.DoesNotExist:
+        model = CoachForClient.objects.create(
+            coach=coach, client=client,
+            group_type=return_group_type_by_id(group_type),
+            age=return_age_by_id(age)
+        )
+        model.save()
+    if visit_time:
+        for visit_times in return_time_by_id(visit_time):
+            model.visit_time.add(visit_times)
+    if visit_day:
+        for visit_days in return_day_by_id(visit_day):
+            model.visit_day.add(visit_days)
+    model.save()
+
+
+def return_group_type_by_id(data: int) -> GroupType:
+    return GroupType.objects.get(id=data)
+
+
+def return_age_by_id(data: int) -> Age:
+    return Age.objects.get(id=data)
+
+
+def return_time_by_id(data: list) -> list:
+    return [element for element in AllTime.objects.filter(id__in=data)]
+
+
+def return_day_by_id(data: list) -> list:
+    return [element for element in Days.objects.filter(id__in=data)]
 
 
 def new_clients(coach: User) -> list:
@@ -130,7 +157,7 @@ def recreate_client_data(data: list) -> list:
     return [dict(
         fullname=element.fullname,
         phone_number=element.phone_number,
-        **return_base_data(element),
+        **return_client_data(element),
         status=element.status_coach
     ) for element in data]
 
@@ -196,6 +223,26 @@ def return_time() -> list:
             title=time.time,
             value=time.id
         ) for time in AllTime.objects.all()
+    ]
+
+
+def return_day() -> list:
+    time: Days
+    return [
+        dict(
+            title=time.day,
+            value=time.id
+        ) for time in Days.objects.all()
+    ]
+
+
+def return_age() -> list:
+    time: Age
+    return [
+        dict(
+            title=time.age,
+            value=time.id
+        ) for time in Age.objects.all()
     ]
 
 

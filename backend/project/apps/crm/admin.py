@@ -98,7 +98,7 @@ class CoachForClientAdmin(ModelAdmin):
     fieldsets = (
         ('Тренер:', {'fields': ('coach',)}),
         ('Клиента:', {'fields': ('client',)}),
-        ('Тип и время занятий:', {'fields': ('visit_time', 'group_type')}),
+        ('Тип и время занятий:', {'fields': ('visit_time', 'visit_day', 'group_type', 'age')}),
     )
     list_display = ('id', 'coach', 'client')
     model = CoachForClient

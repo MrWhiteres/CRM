@@ -1,57 +1,43 @@
 <template>
-  <v-card class="base-container" outlined shaped>
-    <v-card-title>Таблица новых клиентов:
+  <v-card outlined shaped style="max-width: 100%">
+    <v-card-title v-if="height > 220">
+      Таблица новых клиентов: {{ currentDate }}
     </v-card-title>
-    <v-card-title>{{ currentDate }}</v-card-title>
-    <v-container style="min-width: 100%" v-if="showTable">
-      <v-form @submit.prevent="submitForm">
-        <v-skeleton-loader :loading="loading_skeleton" boilerplate type="article">
-          <v-data-table
-            :headers="headers"
-            :items="items"
-            class="elevation-1"
-            height="100%"
-            style="min-width: 100%; min-height: 100%;"
-            width="100%">
-            <template v-slot:item.class_type="{ item }">
-              <v-select
-                v-model="item.props.title.class_type"
-                :items="group_type"
-                style="min-width: 135px"
-                variant="underlined"
-              />
-            </template>
-            <template v-slot:item.crm_status="{ item }">
-              <v-select
-                v-model="item.props.title.crm_status"
-                :items="crm_status"
-                style="min-width: 135px"
-                variant="underlined"
-              />
-            </template>
-            <template v-slot:item.coach="{ item }">
-              <v-select
-                v-model="item.props.title.coach"
-                :items="coach_list"
-                style="min-width: 135px"
-                variant="underlined"
-              />
-            </template>
-            <template v-slot:item.data="{ item }">
-              {{ formatDate(item.props.title.data) }}
-            </template>
-          </v-data-table>
-        </v-skeleton-loader>
-        <v-btn class="text-success text-caption text-capitalize" style="position: relative; left: 46%; margin-top: 10px"
-               type="submit" :loading="loading">Отправить
+    <v-card-title v-if="height === 220">
+      Таблица новых клиентов:
+    </v-card-title>
+    <v-card-title v-if="height === 220">
+      {{ currentDate }}
+    </v-card-title>
+    <v-card-text>
+      <n-space justify="space-between">
+        <v-btn :loading="button_update" class="text-caption mb-1" variant="outlined" @click="fetchData">
+          Обновить таблицу
         </v-btn>
+        <v-btn :loading="button_send" :disabled="data.length === 0" class="text-caption mb-1" variant="outlined" @click="submitForm">
+          Сохранить изменения
+        </v-btn>
+      </n-space>
+    </v-card-text>
+    <v-container v-if="showTable" style="overflow: auto; white-space: pre;">
+      <v-form @submit.prevent="submitForm">
+        <n-data-table
+          :columns="createColumns()"
+          :data="data"
+          :pagination="pagination"
+          :row-key="rowKey"
+          :loading="loading"
+          class="table-naive"
+          size="small"
+          @update:checked-row-keys="handleCheck"
+        />
       </v-form>
     </v-container>
     <v-container v-else class="text-center" style="min-width: 100%">
       <v-card>
         <v-alert
-          type="info"
           text="Новые заявки отсутствуют!"
+          type="info"
           variant="tonal"
         />
       </v-card>
@@ -59,82 +45,184 @@
   </v-card>
 </template>
 
-<script>
-import axios from "axios";
-import {VDataTable, VSkeletonLoader} from "vuetify/labs/components";
+<script setup>
+import {computed, defineComponent, h, ref} from "vue";
+import {useDisplay} from "vuetify";
 import moment from "moment";
+import axios from "axios";
+import {NSelect} from "naive-ui";
 
-export default {
-  name: "ClientList",
-  components: {
-    VDataTable, VSkeletonLoader
+const currentDate = ref(new Date().toLocaleDateString("ru-RU", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+}))
+const loading = ref(true)
+const {name} = useDisplay()
+const height = computed(() => {
+  switch (name.value) {
+    case 'xs':
+      return 220
+    case 'sm':
+      return 400
+    case 'md':
+      return 500
+    case 'lg':
+      return 600
+    case 'xl':
+      return 800
+    case 'xxl':
+      return 1200
+  }
+
+  return undefined
+})
+const showTable = ref(false)
+const data = ref([])
+const group_type = ref([])
+const crm_status = ref([])
+const coach_list = ref([])
+const rowKey = (row) => row.id
+const pagination = ref({
+  pageSize: 50
+})
+const checkedRowKeysRef = ref([]);
+const handleCheck = (rowKeys) => {
+  checkedRowKeysRef.value = rowKeys;
+}
+const formatDate = defineComponent({
+  props: {
+    value: [String]
   },
-  data() {
-    return {
-      items: [],
-      currentDate: new Date().toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }),
-      loading: false,
-      showTable: true,
-      loading_skeleton: true,
-      headers: [
-        {title: "Имя", key: "name"},
-        {title: "Фамилия", key: "lastname"},
-        {title: "Номер телефона", key: "phone_number"},
-        {title: "Секция", key: "section"},
-        {title: "Возрастная категория", key: "age"},
-        {title: "Тип занятий", key: "class_type"},
-        {title: "Дни Посещения", key: "visit_day"},
-        {title: "Время Посещения", key: "visit_time"},
-        {title: "Статус клиента", key: "crm_status"},
-        {title: "Тренер", key: "coach"},
-        {title: "Дата добавления", key: "data"},
-      ],
-      group_type: [],
-      crm_status: [],
-      coach_list: []
-    }
+  setup(props) {
+    return () =>
+      h(
+        'span',
+        moment(props.value).locale('ru').format('DD MMMM YYYY р. HH:mm')
+      )
+  }
+})
+const button_update = ref(false)
+const button_send = ref(false)
+const createColumns = () => [
+  {
+    title: "Фамилия Имя",
+    key: "fullname",
+    width: 150,
   },
-  methods: {
-    async fetchData() {
-      try {
-        const response = await axios.get('client-list/')
-        this.items = response.data.elements
-        if (this.items.length === 0) {
-          this.showTable = false
+  {
+    title: "Номер телефона",
+    key: "phone_number",
+  },
+  {
+    title: "Секция",
+    key: "section",
+    width: 150,
+  },
+  {
+    title: "Возрастная категория",
+    key: "age",
+    width: 170,
+  },
+  {
+    title: "Тип занятий",
+    key: "class_type",
+    width: 160,
+    render(row, index) {
+      return h(NSelect, {
+        value: row.class_type,
+        options: group_type.value,
+        onUpdateValue(v) {
+          data.value[index].class_type = v;
         }
-        this.loading_skeleton = false
-
-        this.crm_status = response.data.crm_status
-        this.group_type = response.data.group_type
-        this.coach_list = response.data.coach
-      } catch (_) {
-        this.showTable = false
-      }
-    },
-    async submitForm() {
-      try {
-        this.loading = true
-        await axios.post('client-list/', {clients: this.items})
-        await this.fetchData()
-        this.loading = false
-      } catch (_) {
-
-      }
-    },
-    formatDate(value) {
-      return moment(value).locale('ru').format('DD MMMM YYYY р. HH:mm');
+      });
     },
   },
-  mounted() {
-    this.fetchData()
+  {
+    title: "Дни посещения",
+    key: "visit_day",
+  },
+  {
+    title: "Время посещения",
+    key: "visit_time",
+  },
+  {
+    title: "Статус клиента",
+    key: "crm_status",
+    width: 180,
+    render(row, index) {
+      return h(NSelect, {
+        value: row.crm_status,
+        options: crm_status.value,
+        onUpdateValue(v) {
+          data.value[index].crm_status = v;
+        }
+      });
+    },
+  },
+  {
+    title: "Тренер",
+    key: "coach",
+    width: 200,
+    render(row, index) {
+      return h(NSelect, {
+        value: row.coach,
+        options: coach_list.value,
+        onUpdateValue(v) {
+          data.value[index].coach = v;
+        }
+      });
+    },
+  },
+  {
+    title: "Дата добавления",
+    key: "data",
+    render(row, index) {
+      return h(formatDate, {
+        value: row.data,
+        onUpdateValue(v) {
+          data.value[index].data = v;
+        }
+      })
+    },
+  },
+];
+
+const submitForm = async () => {
+  button_send.value = true
+  try {
+    await axios.post('client-list/', {clients: data.value})
+    await fetchData()
+  } catch (error) {
+
+  }
+  button_send.value = false
+}
+
+const fetchData = async () => {
+  try {
+    data.value = []
+    button_update.value = true
+    const response = await axios.get('client-list/')
+    data.value = response.data.elements
+    showTable.value = data.value.length > 0
+    loading.value = false
+    group_type.value = response.data.group_type
+    crm_status.value = response.data.crm_status
+    coach_list.value = response.data.coach
+    button_update.value = false
+  } catch (error) {
+    showTable.value = false
+    button_update.value = false
   }
 }
+
+fetchData()
 </script>
 
 <style scoped>
-
+.table-naive {
+  overflow: auto;
+  white-space: pre;
+}
 </style>

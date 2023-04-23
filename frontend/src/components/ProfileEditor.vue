@@ -218,7 +218,7 @@ const updateProfile = () => {
 
 <style scoped>
 .v-sheet {
-  padding: 10px;
+  padding: 50px;
 }
 
 .v-form {

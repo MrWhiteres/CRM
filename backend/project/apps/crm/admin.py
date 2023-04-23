@@ -68,7 +68,7 @@ class ClientsAdmin(ModelAdmin):
         ('Дата обновление и добавление клиента:', {'fields': ('date_added', 'date_update')}),
     )
     readonly_fields = ('date_added', 'date_update')
-    list_display = ('id', 'fullname', 'phone_number', 'status', 'date_added')
+    list_display = ('id', 'fullname', 'phone_number', 'status', 'status_coach', 'date_added')
     model = Clients
 
 

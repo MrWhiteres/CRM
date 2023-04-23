@@ -5,6 +5,7 @@ export default createStore({
     access: "",
     refresh: "",
     user: "",
+    logout: true,
   },
   getters: {},
   mutations: {
@@ -12,6 +13,7 @@ export default createStore({
       state.access = ""
       state.refresh = ""
       state.user = ""
+      state.logout = false
     },
     setAccess(state, access) {
       state.access = access
@@ -21,6 +23,9 @@ export default createStore({
     },
     setUser(state, user) {
       state.user = user
+    },
+    setLogout(state, logout) {
+      state.logout = logout
     },
   },
   actions: {

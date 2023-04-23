@@ -1,343 +1,291 @@
 <template>
-  <v-card class="base-container" outlined shaped>
+  <v-card class="base-container" outlined shaped style="max-width: 100%">
     <v-card-title>Таблица новых клиентов:
-      <v-btn @click="fetchData">Click</v-btn>
     </v-card-title>
-    <v-container>
-      <v-form @submit.prevent="submitForm">
-        <v-skeleton-loader :loading="loading_skeleton" boilerplate type="article">
-          <v-data-table
-            v-model:items-per-page="itemsPerPage"
-            :headers="headers"
-            :items="clients"
-            class="elevation-1"
-            height="100%"
-            style="min-width: 100%; min-height: 100%;"
-            width="100%"
-          >
-            <template v-slot:top>
-              <v-toolbar flat>
-                <v-card-title>Список новых клиентов:</v-card-title>
-              </v-toolbar>
-            </template>
-            <template v-slot:item.status="{ item }">
-              <v-select
-                :items="status"
-                v-model="item.props.title.status"
-                variant="underlined"
+    <v-card-text>
+      <n-space justify="space-between">
+        <v-btn :loading="loading" class="text-caption" variant="outlined" @click="fetchData">Обновить таблицу</v-btn>
+        <v-btn :loading="submit" class="text-caption" variant="outlined" @click="submitForm">Сохранить данные</v-btn>
+      </n-space>
+    </v-card-text>
+    <v-container style="min-width: 90%">
+      <v-data-table
+        :headers="headers"
+        :items="items"
+        :loading="loading"
+        :rows-per-page-items="[10, 20, 30]"
+        class="elevation-1"
+        height="100%"
+        style="min-width: 100%; min-height: 100%;"
+        width="100%"
+      >
+        <template v-slot:item.status="{ item }">
+          <n-select
+            v-model:value="item.props.title.status"
+            :options="status"
+            style="width: 140px"
+          />
+        </template>
+        <template v-slot:item.details="{ item }">
+          {{ item.props.title.details.length }}
+        </template>
+        <template v-slot:expanded-row="{ columns, item }">
+          <div class="text-center">
+            <v-dialog
+              v-model="dialog"
+              width="auto"
+            >
+              <v-card border rounded>
+                <v-card-title class="text-center text-h5">Данные посещения:</v-card-title>
+                <v-card-text>
+                  <v-card :width="height === 220 ? 260 : 500" border style="padding: 10px">
+                    <v-card-subtitle class="text-center">
+                      Локация тренировки:
+                    </v-card-subtitle>
+                    <v-row>
+                      <v-col v-for="(location, index) in selected_item.location" :key="index"
+                             :cols="height === 220 ? 8 : 7">
+                        <v-checkbox
+                          v-model="new_item.location"
+                          :label="location.title"
+                          :value="location.value"
+                          color="primary"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
+                    <v-card-subtitle class="text-center">
+                      Тип тренировки:
+                    </v-card-subtitle>
+                    <v-row>
+                      <v-col v-for="(class_type, index) in selected_item.class_type" :key="index"
+                             :cols="height === 220 ? 8 : 7">
+                        <v-checkbox
+                          v-model="new_item.class_type"
+                          :label="class_type.title"
+                          :value="class_type.title"
+                          color="primary"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
+                    <v-card-subtitle class="text-center">
+                      Секция:
+                    </v-card-subtitle>
+                    <v-row>
+                      <v-col v-for="(section, index) in selected_item.section" :key="index"
+                             :cols="height === 220 ? 6 : 6">
+                        <v-checkbox
+                          v-model="new_item.section"
+                          :label="section.title"
+                          :value="section.value"
+                          color="primary"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
+                    <v-card-subtitle class="text-center">
+                      Время тренировки:
+                    </v-card-subtitle>
+                    <v-row>
+                      <v-col v-for="(visit_time, index) in selected_item.visit_time" :key="index"
+                             :cols="height === 220 ? 5 : 4">
+                        <v-checkbox
+                          v-model="new_item.visit_time"
+                          :label="visit_time.title"
+                          :value="visit_time.value"
+                          color="primary"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
+                    <v-card-subtitle class="text-center">
+                      Дни тренировки:
+                    </v-card-subtitle>
+                    <v-row>
+                      <v-col v-for="(day, index) in  selected_item.visit_day" :key="index"
+                             :cols="height > 220 ? 6 : 12">
+                        <v-checkbox
+                          v-model="new_item.visit_day"
+                          :label="day.title"
+                          :value="day.value"
+                          color="primary"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
+                  </v-card>
+                </v-card-text>
+                <v-card-actions style="display:grid; place-items: center">
+                  <v-row>
+                    <v-col cols=6>
+                      <v-btn class="text-caption" variant="outlined" @click="dialog = false">Отменить</v-btn>
+                    </v-col>
+                    <v-col cols=6>
+                      <v-btn :disabled="button_add" class="text-caption" variant="outlined"
+                             @click="new_client(item.props.title)">Добавить
+                      </v-btn>
+                    </v-col>
+                    <v-divider class="border-opacity-100" style="margin-top: 10px"/>
+                  </v-row>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </div>
+          <tr v-if="item.props.title.status === 'recorded'">
+            <td :colspan="columns.length">
+              <v-card-subtitle class="text-center">
+                <v-btn class="text-caption" variant="outlined"
+                       @click="selected_item = item.props.title; dialog = true">Добавить посещение для клиента,
+                  {{ item.props.title.fullname }}
+                </v-btn>
+              </v-card-subtitle>
+            </td>
+          </tr>
+          <tr v-if="item.props.title.details && item.props.title.details.length > 0">
+            <td :colspan="columns.length">
+              <v-data-table
+                :headers="sub_headers"
+                :items="item.props.title.details"
+                class="elevation-1"
+                height="100%"
+                style="min-width: 100%; min-height: 100%;"
+                width="100%"
               />
-            </template>
-            <template v-slot:item.lastname="{ item }">
-              <v-text-field
-                v-model="item.props.title.lastname"
-                variant="underlined"
-              />
-            </template>
-            <template v-slot:item.details="{ item }">
-              {{ item.props.title.details.length }}
-            </template>
 
-            <template v-slot:expanded-row="{ columns, item }">
-              <tr v-if="item.props.title.status === 'recorded'">
-                <td :colspan="columns.length">
-                  <v-data-table
-                    :headers="subHeaders"
-                    :items="item.props.title.details"
-                    class="elevation-1"
-                    height="100%"
-                    style="min-width: 100%; min-height: 100%;"
-                    width="100%"
-                  >
-                    <template v-slot:top>
-                      <v-toolbar flat>
-                        <v-card-title>Данные посещения:</v-card-title>
-                        <v-dialog v-model="dialog" persistent>
-                          <template v-slot:activator="{ props }">
-                            <v-spacer/>
-                            <v-btn
-                              color="black"
-                              v-bind="props"
-                              @click="clearData"
-                              class="text-caption"
-                            >
-                              Добавить посещение для клиента, {{ item.raw.name }}
-                            </v-btn>
-                          </template>
-                          <v-card>
-                            <v-card-title>Добавление новых данных посещения:</v-card-title>
-                            <v-card-text>
-                              <v-select
-                                :items="item.props.title.location"
-                                v-model="this.newData.location"
-                                label="Локация"
-                                variant="outlined"
-                              />
-                              <v-select
-                                :items="item.props.title.visit_day"
-                                v-model="this.newData.visit_day"
-                                label="День проведения"
-                                variant="outlined"
-                              />
-                              <v-select
-                                :items="item.props.title.visit_time"
-                                v-model="this.newData.visit_time"
-                                label="Время проведения "
-                                variant="outlined"
-                              />
-                              <v-select
-                                :items="item.props.title.section"
-                                v-model="this.newData.section"
-                                label="Секция"
-                                variant="outlined"
-                              />
-                              <v-select
-                                :items="item.props.title.class_type"
-                                v-model="this.newData.class_type"
-                                label="Тип занятий"
-                                variant="outlined"
-                              />
-                            </v-card-text>
-                            <v-card-actions>
-                              <v-btn color="primary"
-                                     :disabled="!this.newData.location.length > 0 || !this.newData.visit_day.length > 0 || !this.newData.visit_time.length > 0 || !this.newData.section.length > 0 || !this.newData.class_type.length > 0"
-                                     @click="addNewData(item.props.title)">
-                                Добавить
-                              </v-btn>
-                              <v-btn color="secondary" @click="this.dialog = false">
-                                Отмена
-                              </v-btn>
-                            </v-card-actions>
-                          </v-card>
-                        </v-dialog>
-                      </v-toolbar>
-                    </template>
-                    <template v-slot:item.class_type="{ item }">
-                      {{ returnClassType(item.props.title.class_type) }}
-                    </template>
-                  </v-data-table>
-                </td>
-              </tr>
-            </template>
-          </v-data-table>
-          <v-btn class="btn-submit" color="primary" type="submit">
-            Сохранить
-          </v-btn>
-        </v-skeleton-loader>
-      </v-form>
+            </td>
+          </tr>
+        </template>
+      </v-data-table>
     </v-container>
   </v-card>
 </template>
-<script>
-import {VDataTable, VSkeletonLoader} from "vuetify/labs/components";
-import axios from "axios";
+<script setup>
+import {computed, ref, watch} from 'vue';
+import axios from 'axios';
+import {VDataTable} from "vuetify/labs/components";
+import {useDisplay} from "vuetify";
 
-export default {
-  name: "NewClientCouchTable",
+const status = ref([
+  {'label': 'Записан', 'value': 'recorded'},
+  {'label': 'Отказ', 'value': 'not_recorded'},
+  {'label': 'Не проверен', 'value': 'not_checked'},
+])
+const items = ref([]);
+const loading = ref(false);
+const submit = ref(false);
+const dialog = ref(false);
+const selected_item = ref(null);
+const new_item = ref({
+  class_type: '',
+  section: '',
+  visit_time: '',
+  visit_day: '',
+  location: ''
+})
+const expand = ref([]);
+const headers = [
+  {title: "", key: "data-table-expand"},
+  {title: 'Фамилия Имя', key: 'fullname'},
+  {title: 'Номер телефона', key: 'phone_number'},
+  {title: 'Статус клиента', key: 'status'},
+  {title: 'Количество записей', key: 'details'},
+];
+const subHeaders = ref([
+  {title: "Место проведения", key: "location"},
+  {title: "День проведения", key: "visit_day"},
+  {title: "Время проведения", key: "visit_time"},
+  {title: "Секция", key: "section"},
+  {title: "Тип группы", key: "class_type"},
+])
+const button_add = ref(true)
+const sub_headers = ref([
+  {
+    title: "Место проведения",
+    key: "location",
+  },
+  {
+    title: "День проведения",
+    key: "visit_day",
+  },
+  {
+    title: "Время проведения",
+    key: "visit_time",
+    width: 150,
+  },
+  {
+    title: "Секция",
+    key: "section",
+  },
+  {
+    title: "Тип группы",
+    key: "class_type",
+  },
+])
+const {name} = useDisplay()
+const height = computed(() => {
+  switch (name.value) {
+    case 'xs':
+      return 220
+    case 'sm':
+      return 400
+    case 'md':
+      return 500
+    case 'lg':
+      return 600
+    case 'xl':
+      return 800
+    case 'xxl':
+      return 1200
+  }
 
-  components: {VSkeletonLoader, VDataTable},
-  data() {
-    return {
-      dialog: false,
-      loading_skeleton: true,
-      headers: [
-        {title: "Имя", key: "name"},
-        {title: "Фамилия", key: "lastname"},
-        {title: "Номер телефона", key: "phone_number"},
-        {title: "Статус клиента", key: "status"},
-        {title: "", key: "data-table-expand"},
-        {title: "Количество записей", key: "details"},
-      ],
-      subHeaders: [
-        {title: "Место проведения", key: "location"},
-        {title: "День проведения", key: "visit_day"},
-        {title: "Время проведения", key: "visit_time"},
-        {title: "Секция", key: "section"},
-        {title: "Тип группы", key: "class_type"},
-      ],
-      clients: [],
-      itemsPerPage: 0,
-      newData: {
-        location: "",
-        visit_day: "",
-        visit_time: "",
-        class_type: "",
-        section: ""
-      },
-      class_type: [{'title': 'Персональные', 'value': 'single'},
-        {'title': 'Групповые', 'value': 'group'}],
-      status: [
-        {'title': 'Записан', 'value': 'recorded'},
-        {'title': 'Отказ', 'value': 'not_recorded'},
-        {'title': 'Не проверен', 'value': 'not_checked'},
-      ]
-    };
-  },
-  methods: {
-    async submitForm() {
-      try {
-        await axios.post("new-clients/", {data: this.clients});
-        await this.fetchData()
-      } catch (_) {
-      }
-    },
-    async fetchData() {
-      try {
-        this.clients = []
-        this.loading_skeleton = true;
-        const response = await axios.get("new-clients/");
-        this.clients = response.data.elements.map((client) => ({
-          ...client,
-          details: client.details || [],
-        }));
-        this.itemsPerPage = response.data.elements.length;
-        this.loading_skeleton = false;
-      } catch (_) {
-        this.loading_skeleton = false;
-      }
-    },
-    addNewData(item) {
-      item.details.push({
-        location: this.newData.location,
-        visit_time: this.newData.visit_time,
-        visit_day: this.newData.visit_day,
-        class_type: this.newData.class_type,
-        section: this.newData.section,
-      });
-      this.clearData()
-      this.dialog = false;
-    },
-    clearData() {
-      this.newData = {
-        location: "",
-        visit_day: "",
-        visit_time: "",
-        class_type: "",
-        section: ""
-      };
-    },
-    returnClassType(element) {
-      for (let type of this.class_type) {
-        if (type.value === element) {
-          return type.title
-        }
-      }
-    },
-  },
-  mounted() {
-    this.fetchData();
-  },
+  return undefined
+})
+const new_client = async (value) => {
+  if (!selected_item.details) {
+    selected_item.details = []
+  }
+  value.details.push(new_item.value)
+  new_item.value = {
+    class_type: '',
+    section: '',
+    visit_time: '',
+    visit_day: '',
+    location: ''
+  }
+  dialog.value = false
+}
+watch(new_item, async () => {
+  button_add.value = !(
+    new_item.value.class_type.length > 0 &&
+    new_item.value.section.length > 0 &&
+    new_item.value.visit_time.length > 0 &&
+    new_item.value.visit_day.length > 0
+  )
+}, {deep: true})
+const fetchData = async () => {
+  try {
+    loading.value = true;
+    const response = await axios.get('new-clients/');
+    items.value = response.data.elements
+  } catch (_) {
+  } finally {
+    loading.value = false;
+  }
 };
+
+
+const submitForm = async () => {
+  try {
+    submit.value = true
+    await axios.post("new-clients/", {data: items.value});
+    await fetchData()
+  } catch (_) {
+  }
+  submit.value = false
+}
+fetchData();
 </script>
-
-
 <style scoped>
-.base-container {
-  left: 10%;
-  max-width: 80%;
-  min-width: 70%;
-}
-
-.btn-submit {
-  position: relative;
-  margin-top: 10px;
-}
-
-@media screen and (max-width: 1260px) {
-  .btn-submit {
-    left: 75%;
-  }
-}
-
-
-@media screen and (max-width: 767px) {
-  .base-container {
-    left: 0;
-    min-width: 100%;
-    font-size: 15px;
-  }
-
-  .btn-submit {
-    position: relative;
-    margin-top: 10px;
-    left: 64%;
-  }
-}
 
 </style>
-<!--<v-dialog-->
-<!--  v-model="show_info">-->
-<!--<v-data-table-->
-<!--  :headers="subHeaders"-->
-<!--  :items="item.props.title.details"-->
-<!--  class="elevation-1"-->
-<!--  height="100%"-->
-<!--  style="min-width: 100%; min-height: 100%;"-->
-<!--  width="100%"-->
-<!--&gt;-->
-<!--  <template v-slot:top>-->
-<!--    <v-toolbar flat>-->
-<!--      <v-card-title>Данные посещения:</v-card-title>-->
-<!--      <v-dialog v-model="dialog" persistent>-->
-<!--        <template v-slot:activator="{ props }">-->
-<!--          <v-btn-->
-<!--            color="black"-->
-<!--            icon-->
-<!--            v-bind="props"-->
-<!--            @click="clearData"-->
-<!--          >-->
-<!--            <v-icon>mdi-account-plus-outline</v-icon>-->
-<!--          </v-btn>-->
-<!--        </template>-->
-<!--        <v-card>-->
-<!--          <v-card-title>Добавление новых данных посещения:</v-card-title>-->
-<!--          <v-card-text>-->
-<!--            <v-select-->
-<!--              :items="item.props.title.location"-->
-<!--              v-model="this.newData.location"-->
-<!--              label="Локация"-->
-<!--              variant="outlined"-->
-<!--            />-->
-<!--            <v-select-->
-<!--              :items="item.props.title.visit_day"-->
-<!--              v-model="this.newData.visit_day"-->
-<!--              label="День проведения"-->
-<!--              variant="outlined"-->
-<!--            />-->
-<!--            <v-select-->
-<!--              :items="item.props.title.visit_time"-->
-<!--              v-model="this.newData.visit_time"-->
-<!--              label="Время проведения "-->
-<!--              variant="outlined"-->
-<!--            />-->
-<!--            <v-select-->
-<!--              :items="item.props.title.section"-->
-<!--              v-model="this.newData.section"-->
-<!--              label="Секция"-->
-<!--              variant="outlined"-->
-<!--            />-->
-<!--            <v-select-->
-<!--              :items="item.props.title.class_type"-->
-<!--              v-model="this.newData.class_type"-->
-<!--              label="Тип занятий"-->
-<!--              variant="outlined"-->
-<!--            />-->
-<!--          </v-card-text>-->
-<!--          <v-card-actions>-->
-<!--            <v-btn color="primary"-->
-<!--                   :disabled="!this.newData.location.length > 0 || !this.newData.visit_day.length > 0 || !this.newData.visit_time.length > 0 || !this.newData.section.length > 0 || !this.newData.class_type.length > 0"-->
-<!--                   @click="addNewData(item.props.title)">-->
-<!--              Добавить-->
-<!--            </v-btn>-->
-<!--            <v-btn color="secondary" @click="this.dialog = false">-->
-<!--              Отмена-->
-<!--            </v-btn>-->
-<!--          </v-card-actions>-->
-<!--        </v-card>-->
-<!--      </v-dialog>-->
-<!--    </v-toolbar>-->
-<!--  </template>-->
-<!--  <template v-slot:item.class_type="{ item }">-->
-<!--    {{ returnClassType(item.props.title.class_type) }}-->
-<!--  </template>-->
-<!--</v-data-table>-->
-<!--</v-dialog>-->

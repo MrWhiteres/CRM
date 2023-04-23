@@ -5,7 +5,8 @@ from django.utils import timezone
 
 from . import check_client
 from .operators import return_client_data
-from ..models import CoachForClient, Clients, ClassAttendance, NewClientCoach, AllTime, GroupType, Days, Age
+from ..models import CoachForClient, Clients, ClassAttendance, NewClientCoach, AllTime, GroupType, Days, Age, Section, \
+    Location
 from ...authorization.models import User
 
 
@@ -17,7 +18,7 @@ def get_clients_for_coach(user: User) -> list:
         fullname=client.client.fullname,
         phone_number=client.client.phone_number,
         payed_status=change_status(client.client.payed_status),
-        status=change_status(client.client.payed_status)
+        status=change_status(client.client.payed_status),
     ) for client in clients]
 
 
@@ -133,14 +134,27 @@ def new_clients(coach: User) -> list:
 def change_choose_data(data: list) -> list:
     element: dict
     for element in data:
-        element['visit_day'] = element['visit_day'].split(', ')
-        element['visit_time'] = element['visit_time'].split(', ')
-        element['location'] = element['location'].split(', ')
-        element['section'] = element['section'].split(', ')
+        element['visit_day'] = recreate_date(element['visit_day'])
+        element['visit_time'] = recreate_date(element['visit_time'])
+        element['location'] = recreate_date(element['location'])
+        element['section'] = recreate_date(element['section'])
         element['class_type'] = [{'title': 'Персональные', 'value': 'single'},
                                  {'title': 'Групповые', 'value': 'group'}]
+        element['details'] = []
 
     return data
+
+
+def recreate_date(data: list) -> list:
+    if type(data) == str:
+        return [dict(
+            title=data,
+            value=data
+        )]
+    return [dict(
+        title=element,
+        value=element
+    ) for element in data]
 
 
 def return_clients(coach: User) -> QuerySet:
@@ -155,25 +169,91 @@ def return_clients_list(data: QuerySet) -> list:
 def recreate_client_data(data: list) -> list:
     element: Clients
     return [dict(
+        id=element.id,
         fullname=element.fullname,
         phone_number=element.phone_number,
         **return_client_data(element),
-        status=element.status_coach
+        status=return_coach_status(element.status_coach)
     ) for element in data]
+
+
+def return_coach_status(status: str) -> str:
+    return [elements[0] for element in Clients.COACH_STATUS if status in (elements := list(element))][0]
 
 
 def create_new_clients_coach(data: dict, coach: User):
     data = cleared_data(data)
-    clients = return_query_set_clients(data['id_list'])
-    delete_temporary_clients(clients, coach)
-    for client in clients:
-        client: Clients
+    if not data:
+        return
+    data = convert_data(data)
+
+    for element in data['clients']:
+        client: Clients = element['client']
         client.payed_status = Clients.NEW_CLIENT
-        client.status_coach = return_correct_data(client, data, 'status')
+        client.status_coach = element['status']
         client.save()
-        for element_time in return_correct_data(client, data, 'details'):
-            create_relationship(coach=coach, client=client, visit_time=element_time,
-                                group_type=return_correct_data(client, data, 'class_type'))
+        delete_temporary_coach_client(coach=coach, client=client)
+        if client.status_coach == Clients.NOT_RECORDED:
+            continue
+        for detail in element["details"]:
+            create_relationship(
+                coach=coach, client=client,
+                visit_time=detail['visit_time'], visit_day=detail['visit_day'],
+                group_type=detail['class_type'], age=detail['age']
+            )
+
+
+def delete_temporary_coach_client(coach: User, client: Clients):
+    try:
+        NewClientCoach.objects.get(coach=coach, client=client).delete()
+    except NewClientCoach.DoesNotExist:
+        pass
+
+
+def convert_data(data: dict) -> dict:
+    return dict(
+        clients=[
+            dict(
+                client=Clients.objects.get(id=element['id']),
+                status=element['status'],
+                details=convert_details(element['details'], element["age"]))
+            for element in data['clients']]
+    )
+
+
+def convert_details(data: list, age: str) -> list:
+    return [dict(
+        class_type=convert_class_type(element['class_type']),
+        section=convert_section(element['section']),
+        visit_time=convert_time(element['visit_time']),
+        visit_day=convert_day(element['visit_day']),
+        location=convert_location(element['location']),
+        age=convert_age(age),
+    ) for element in data]
+
+
+def convert_class_type(data: str) -> int:
+    return GroupType.objects.get(class_type=data).id
+
+
+def convert_section(data: str) -> list:
+    return [Section.objects.get(section=data).id]
+
+
+def convert_time(data: str) -> list:
+    return [AllTime.objects.get(time=data).id]
+
+
+def convert_day(data: str) -> list:
+    return [Days.objects.get(day=data).id]
+
+
+def convert_age(data: str) -> int:
+    return Age.objects.get(age=data).id
+
+
+def convert_location(data: str) -> Location:
+    return Location.objects.get(location=data)
 
 
 def return_correct_data(client: Clients, data: dict, key: str) -> str:
@@ -193,23 +273,15 @@ def cleared_data(data: dict) -> dict:
                 id=element['id'],
                 status=element['status'],
                 details=element['details'],
+                age=element['age'],
             ) for element in data['clients']
-            if len(element['details']) != 0 or element['status'] != Clients.NOT_CHECKED
-        ],
-        id_list=[
-            element['id'] for element in data['clients'] if
-            len(element['details']) != 0 or element['status'] != Clients.NOT_CHECKED
+            if len(element['details']) > 0 and element['status'] != Clients.NOT_CHECKED
         ]
     )
 
 
 def return_query_set_clients(list_id: list) -> list:
     return Clients.objects.filter(id__in=list_id)
-
-
-def delete_temporary_clients(clients: list, coach: User) -> None:
-    for element in get_temporary_clients(clients, coach):
-        element.delete()
 
 
 def get_temporary_clients(clients: list, coach: User) -> list:

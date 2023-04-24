@@ -5,6 +5,7 @@ from django.db.models import (
     Model, EmailField, BooleanField, DateTimeField, CharField, ForeignKey,
     DO_NOTHING, CASCADE
 )
+from django.forms import model_to_dict
 from django_resized import ResizedImageField
 
 from project.apps.authorization import path_to_image_profile
@@ -17,7 +18,12 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.save(using=self._db)
+        if user.is_superuser and user.is_staff:
+            user.is_active = True
+            user.email_verify = True
+            user.user_type = User.ADMIN
+            user.user_group = User.EMPTY
+        user.save()
         return user
 
     def create_user(self, email, password=None, **extra_fields) -> User:
@@ -33,7 +39,6 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-
         return self._create_user(email, password, **extra_fields)
 
 

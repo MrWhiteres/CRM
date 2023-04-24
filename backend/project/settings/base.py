@@ -20,10 +20,15 @@ SECRET_KEY = KEY
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+NEW_ADMIN = [
+    'material',
+    'material.admin',
+]
 
 DJANGO_DEFAULT_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -44,11 +49,20 @@ PROJECT_APPS = [
     'project.apps.crm'
 ]
 
-INSTALLED_APPS = DJANGO_DEFAULT_APPS + DOWNLOADED_APPS + PROJECT_APPS
-
+INSTALLED_APPS = NEW_ADMIN + DJANGO_DEFAULT_APPS + DOWNLOADED_APPS + PROJECT_APPS
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8080',
+    'http://localhost',
+    'http://185.233.119.142:8080',
+    'http://185.233.119.142:8000',
+    'http://185.233.119.142:80',
+]
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080',
     'http://localhost',
+    'http://185.233.119.142:8080',
+    'http://185.233.119.142:8000',
+    'http://185.233.119.142:80',
 ]
 
 REST_FRAMEWORK = {

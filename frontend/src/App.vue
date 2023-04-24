@@ -102,25 +102,27 @@ export default {
     const getUserProfile = async () => {
       axios.defaults.headers['Authorization'] = `Bearer ${store.state.access}`
       try {
-        const response = await axios.get('/user/profile')
-        let image = response.data.image
-        store.commit('setLogout', true);
+        const response = await axios.get('/user/profile/')
+        const user = response.data
+
+        let image = user.image
         if (image) {
           try {
             const responseImage = await axios.get('user/image/', {responseType: 'blob'})
             response.data.image = URL.createObjectURL(new Blob([responseImage.data], {type: 'text/plain;charset=utf-8'}))
-            store.commit('setLogout', true);
           } catch (error) {
-            localStorage.clear()
-            this.store.commit('clearState')
-            await this.router.push({name: 'auth'})
           }
         }
+        store.commit('setLogout', true);
         store.commit('setUser', response.data)
       } catch (error) {
-        console.log(error)
       }
     }
+    setInterval(() => {
+      if (!store.state.logout && !['/auth', '/form', '/confirm_email'].includes(router.currentRoute.value.fullPath)) {
+        router.push({name: 'auth'});
+      }
+    })
 
     setInterval(() => {
       if (store.state.access && !store.state.user) {
@@ -134,11 +136,8 @@ export default {
         const response = await axios.post('refresh_token/', {refresh: store.state.refresh})
         store.commit('setAccess', response.data.access)
         await getUserProfile()
-        store.commit('setLogout', true);
       } catch (error) {
-        localStorage.clear()
-        store.commit('clearState')
-        await this.router.push({name: 'auth'})
+
       }
     }
 
@@ -160,11 +159,6 @@ export default {
       store.commit('clearState')
       await router.push({name: 'auth'});
     }
-    setInterval(() => {
-      if (!store.state.logout && !['/auth', '/form', '/confirm_email'].includes(router.currentRoute.value.fullPath)) {
-        router.push({name: 'auth'});
-      }
-    })
     const loading = ref(true) // set the loading initially to true
 
     const initLoadingTimeout = () => {

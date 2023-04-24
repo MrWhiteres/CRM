@@ -5,10 +5,10 @@
     <v-card-text>
       <n-space justify="space-between">
         <v-btn :loading="loading" class="text-caption" variant="outlined" @click="fetchData">Обновить таблицу</v-btn>
-        <v-btn :loading="submit" class="text-caption" variant="outlined" @click="submitForm">Сохранить данные</v-btn>
+        <v-btn :loading="submit" :disabled="items.length === 0" class="text-caption" variant="outlined" @click="submitForm">Сохранить данные</v-btn>
       </n-space>
     </v-card-text>
-    <v-container style="min-width: 90%">
+    <v-container v-if="items.length > 0" style="min-width: 90%">
       <v-data-table
         :headers="headers"
         :items="items"
@@ -158,6 +158,15 @@
         </template>
       </v-data-table>
     </v-container>
+    <v-container v-else>
+      <v-card>
+        <v-alert
+          text="Новые заявки отсутствуют!"
+          type="info"
+          variant="tonal"
+        />
+      </v-card>
+    </v-container>
   </v-card>
 </template>
 <script setup>
@@ -268,6 +277,7 @@ const fetchData = async () => {
     loading.value = true;
     const response = await axios.get('new-clients/');
     items.value = response.data.elements
+
   } catch (_) {
   } finally {
     loading.value = false;

@@ -284,7 +284,7 @@ export default {
         const status = response.request.status
         const error = response.response.data.error
         if (status === 400 && error === 'UserExist') {
-          this.error = 'Пользователь с таким Username или Email уже существует.'
+          this.error = 'Пользователь с таким Email уже существует.'
         } else if (status === 400 && error === 'InvalidPassword') {
           this.error = 'Введен некорректный пароль.'
         }

@@ -1,11 +1,11 @@
 front:
 	cd frontend ; npm run dev --host
 
-back:
-	cd backend; . venv/Scripts/activate; python manage.py runserver
+dev:
+	docker-compose -f dev.yml up --build --force-recreate --no-deps
 
-dock:
-	docker-compose up --build -d --force-recreate --no-deps
+prod:
+	docker-compose -f prod.yml up --build --force-recreate --no-deps
 
 stop:
 	docker-compose down ; docker image prune -f

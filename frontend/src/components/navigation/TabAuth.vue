@@ -4,26 +4,26 @@
     :title="user.full_name"
   />
   <v-divider class="border-opacity-100 mr-1" vertical/>
-  <v-tabs v-model="active_tab">
+  <v-tabs>
     <v-tab value="5"
-           @click="this.$router.push({name: 'profile'})">
+           @click="router.push({name: 'profile'})">
       Профиль
     </v-tab>
-    <v-tab value="4" @click="this.$router.push({name: 'form'})">Форма</v-tab>
+    <v-tab value="4" @click="router.push({name: 'form'})">Форма</v-tab>
     <v-tab v-if="['Оператор', 'Администратор'].includes(user.type)"
-           value="0" @click="this.$router.push({name: 'clients-all-list'})">
+           value="0" @click="router.push({name: 'clients-all-list'})">
       Таблица клиентов
     </v-tab>
     <v-tab v-if="['Тренер', 'Старший тренер'].includes(user.type)"
-           value="1" @click="this.$router.push({name: 'couch-new-client'})">
+           value="1" @click="router.push({name: 'couch-new-client'})">
       Таблица новых клиентов
     </v-tab>
     <v-tab v-if="['Тренер', 'Старший тренер'].includes(user.type)"
-           value="2" @click="this.$router.push({name: 'couch-table'})">
+           value="2" @click="router.push({name: 'couch-table'})">
       Таблица посещений
     </v-tab>
     <v-tab v-if="['Оператор', 'Администратор'].includes(user.type)"
-           value="3" @click="this.$router.push({name: 'client-list'})">
+           value="3" @click="router.push({name: 'client-list'})">
       Таблица новых клиентов
     </v-tab>
   </v-tabs>
@@ -38,21 +38,15 @@
 </template>
 
 <script setup>
-import {ref, watch} from "vue";
-
-import router from "@/router";
+import {ref} from "vue";
 import {useStore} from "vuex";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const store = useStore()
-const active_tab = ref(localStorage.getItem('active_tab' || null))
 const user = ref(store.state.user)
 setInterval(() => {
-  if (user.value !== store.state.user) {
-    user.value = store.state.user
-  }
-})
-watch(active_tab, async (newValue) => {
-  localStorage.setItem('active_tab', newValue)
+  user.value = store.state.user
 })
 const logout = () => {
   localStorage.clear();

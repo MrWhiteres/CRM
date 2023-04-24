@@ -469,7 +469,7 @@ const submitForm = async () => {
   try {
     await axios.post('forms/', {data: formClient.value})
     dialog.value = true
-    // await clear_all_data()
+    await clear_all_data()
   } catch (_) {
 
   }

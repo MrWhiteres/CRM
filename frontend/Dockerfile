@@ -1,8 +1,10 @@
-FROM node:lts-alpine as build-stage
+FROM node:lts-alpine as develop-stage
 WORKDIR /frontend
 COPY package*.json ./
 RUN yarn install
 COPY . .
+
+FROM develop-stage as build-stage
 RUN yarn build
 
 

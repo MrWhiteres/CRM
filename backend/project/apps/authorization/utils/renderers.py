@@ -12,4 +12,4 @@ def renderer_user(*, user: User) -> dict:
 
 
 def return_type_user(user_type: str) -> str:
-   return [elements[1] for status in User.USER_STATUS if user_type in (elements := list(status))][0]
+    return [elements[1] for status in User.USER_STATUS if user_type in (elements := list(status))][0]

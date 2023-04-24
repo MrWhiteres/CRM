@@ -38,7 +38,7 @@
    файле `./frontend/src/plugins/index.js` в строке `axios.defaults.baseURL = 'http://localhost:<PORT>/api/'`
 3. Установить необходимые библиотеки для клиента:
 4. В папке `./frontend/` ввести команду `yarn install` или `npm install`
-5. Для развертки проекта ввести команду `make dock` -> запуск `Postgres`,`Django`,`Nginx`
+5. Для развертки проекта ввести команду `make dev` -> запуск `Postgres`,`Nginx`
 6. Старт клиентской части `make front` -> запуск `Vue` приложения
 
 ### Для запуска проекта в prod версии:
@@ -47,4 +47,4 @@
    контейнер `Vue`
 2. `Publisher` порт в контейнере `Vue` должен соответствовать порту на который будет ссылаться контейнер в
    файле `./frontend/src/plugins/index.js` в строке `axios.defaults.baseURL = 'http://localhost:<PORT>/api/'`
-3. Для развертки проекта достаточно ввести команду `make dock`
+3. Для развертки проекта достаточно ввести команду `make prod`

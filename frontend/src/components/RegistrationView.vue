@@ -21,7 +21,7 @@
       @click="success = null"
     ></v-alert>
   </v-container>
-  <v-form fast-fail @submit.prevent="submitForm">
+  <v-form fast-fail @submit.prevent="submitForm" >
     <v-sheet rounded>
       <v-text-field
         v-model="formData.first_name"
@@ -73,7 +73,7 @@
         :minlength="8"
         variant="outlined"
         prepend-icon="mdi-lock-outline"
-        :rules="[rules.requiredField, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex, rules.englishLettersOnly]"
+        :rules="[rules.requiredField, rules.minLengthPassword, rules.passwordConfirmEqual, rules.englishLettersOnly]"
         :type="showPassword ? 'text' : 'password'"
         :value="formData.password"
         clearable
@@ -88,7 +88,7 @@
         :minlength="8"
         variant="outlined"
         prepend-icon="mdi-lock"
-        :rules="[rules.requiredField, rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex, rules.passwordConfirmEqual, rules.englishLettersOnly]"
+        :rules="[rules.requiredField, rules.minLengthPassword, rules.passwordConfirmEqual, rules.englishLettersOnly]"
         :type="showConfirmPassword ? 'text' : 'password'"
         :value="formData.confirm_password"
         clearable
@@ -223,12 +223,12 @@ export default {
         password: {
           required: required,
           minLength: minLength(8),
-          passwordValidate
+          // passwordValidate
         },
         confirm_password: {
           required: required,
           minLength: minLength(8),
-          passwordValidate,
+          // passwordValidate,
           sameAs: sameAs(this.formData.password)
         }
       }
@@ -256,11 +256,11 @@ export default {
     },
     async clearForm() {
       this.formData = {
-        first_name: '',
-        last_name: '',
-        email: '',
-        password: '',
-        confirm_password: '',
+        first_name: null,
+        last_name: null,
+        email: null,
+        password: null,
+        confirm_password: null,
       }
     },
     async showThen() {

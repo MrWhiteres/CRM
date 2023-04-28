@@ -77,7 +77,7 @@ const height = computed(() => {
 
   return undefined
 })
-const showTable = ref(false)
+const showTable = ref(true)
 const data = ref([])
 const group_type = ref([])
 const crm_status = ref([])
@@ -203,6 +203,7 @@ const fetchData = async () => {
   try {
     data.value = []
     button_update.value = true
+    loading.value = true
     const response = await axios.get('client-list/')
     data.value = response.data.elements
     showTable.value = data.value.length > 0

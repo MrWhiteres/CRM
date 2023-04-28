@@ -7,7 +7,7 @@ class TokenUserSerializer(Serializer):
 
 
 class RegistrationUserSerializer(Serializer):
-    email = EmailField(required=True, min_length=5, max_length=50)
+    email = EmailField(required=True, max_length=50)
     password = CharField(required=True, max_length=50)
     confirm_password = CharField(required=True, max_length=50)
     first_name = CharField(required=True, max_length=50)
@@ -15,8 +15,8 @@ class RegistrationUserSerializer(Serializer):
 
 
 class LoginUserSerializer(Serializer):
-    email = EmailField(required=True, min_length=5, max_length=50)
-    password = CharField(required=True, min_length=8, max_length=50)
+    email = EmailField(required=True, max_length=50)
+    password = CharField(required=True, max_length=50)
 
 
 class ImageSerializer(Serializer):
@@ -24,12 +24,12 @@ class ImageSerializer(Serializer):
 
 
 class UserDataSerializer(Serializer):
-    email = EmailField(required=True, min_length=5, max_length=50)
+    email = EmailField(required=True, max_length=50)
     first_name = CharField(required=True, max_length=50)
     last_name = CharField(required=True, max_length=50)
     full_name = CharField(required=True, max_length=100)
     image = BooleanField(required=False)
-    phone_number = CharField(required=False, min_length=5, allow_null=True)
+    phone_number = CharField(required=False, allow_null=True)
     type = CharField(required=True)
 
 

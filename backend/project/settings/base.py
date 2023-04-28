@@ -57,13 +57,15 @@ CSRF_TRUSTED_ORIGINS = [
     'http://185.233.119.142:8000',
     'http://185.233.119.142:80',
 ]
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080',
-    'http://localhost',
-    'http://185.233.119.142:8080',
-    'http://185.233.119.142:8000',
-    'http://185.233.119.142:80',
-]
+
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:8080',
+#     'http://localhost',
+#     'http://185.233.119.142:8080',
+#     'http://185.233.119.142:8000',
+#     'http://185.233.119.142:80',
+# ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

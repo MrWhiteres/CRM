@@ -111,7 +111,7 @@ class NewClientCoachAdmin(ModelAdmin):
         ('Клиента (на проверке):', {'fields': ('client',)}),
     )
     list_display = ('id', 'coach', 'client')
-    readonly_fields = ('client', 'coach')
+    readonly_fields = ('client',)
     model = NewClientCoach
 
 

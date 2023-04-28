@@ -187,7 +187,7 @@ class OtherData(Model):
 
 
 class CoachForClient(Model):
-    coach = ForeignKey(User, verbose_name='Тренер', on_delete=CASCADE)
+    coach = ForeignKey(User, verbose_name='Тренер', on_delete=DO_NOTHING)
     visit_time = ManyToManyField(AllTime, verbose_name='Время посещения тренировки с тренером')
     visit_day = ManyToManyField(Days, verbose_name='Дни посещения тренировки с тренером')
     age = ForeignKey(Age, verbose_name='Возрастная категория', on_delete=CASCADE)

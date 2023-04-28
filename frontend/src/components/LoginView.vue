@@ -33,7 +33,7 @@
         :dense="true"
         label='Пароль:'
         variant="outlined"
-        :rules="[rules.requiredField, rules.englishLettersOnly,  rules.minLengthPassword, rules.numberRegex, rules.specialCharRegex,rules.uppercaseRegex, rules.lowercaseRegex]"
+        :rules="[rules.requiredField, rules.minLengthPassword, rules.passwordConfirmEqual, rules.englishLettersOnly]"
         :type="showPassword ? 'text' : 'password'"
         :value="formData.password"
         clearable
@@ -152,7 +152,7 @@ export default {
         password: {
           required: required,
           minLengthPassword: minLength(8),
-          passwordValidate
+          // passwordValidate
         }
       }
     }

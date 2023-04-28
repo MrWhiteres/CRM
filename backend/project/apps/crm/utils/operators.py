@@ -200,6 +200,7 @@ def add_clients_to_coach(data: dict) -> None:
     clients = data['clients']
     client: dict
     for client in clients:
+        client['crm_status'] = [el[0] for elem in Clients.CRM_STATUS if client['crm_status'] in (el := list(elem))][0]
         if not client['coach'] or client['crm_status'] == Clients.NOT_CHECK:
             continue
         client_object = Clients.objects.get(id=client['id'])

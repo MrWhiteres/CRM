@@ -92,6 +92,7 @@
                   :label="yoga.title"
                   :value="yoga.value"
                   color="primary"
+                  style="margin-bottom: -50px"
                 />
                 <v-select
                   v-model="formClient.yoga_type"
@@ -99,6 +100,7 @@
                   chips
                   label="Выбранные секции:"
                   readonly
+                  style="margin-top: 20px; margin-bottom: -25px"
                   variant="underlined"
                 />
                 <v-text-field
@@ -118,6 +120,7 @@
                   :label="matrial_arts.title"
                   :value="matrial_arts.value"
                   color="primary"
+                  style="margin-bottom: -50px"
                 />
                 <v-select
                   v-model="formClient.matrial_arts_type"
@@ -125,6 +128,7 @@
                   chips
                   label="Выбранные секции:"
                   readonly
+                  style="margin-top: 20px; margin-bottom: -25px"
                   variant="underlined"
                 />
                 <v-text-field
@@ -150,7 +154,7 @@
                 *
               </n-gradient-text>
             </v-card-title>
-            <v-card-text>
+            <v-card-text style="margin-bottom: 20px">
               <v-row>
                 <v-col v-for="(type_group, index) in groups_type" :key="index" cols="6">
                   <v-checkbox
@@ -158,6 +162,7 @@
                     :label="type_group.title"
                     :value="type_group.value"
                     color="primary"
+                    style="margin-bottom: -50px"
                   />
                 </v-col>
               </v-row>
@@ -170,14 +175,15 @@
                 *
               </n-gradient-text>
             </v-card-title>
-            <v-card-text>
+            <v-card-text style="margin-bottom: 30px">
               <v-row>
-                <v-col v-for="(age, index) in ages" :key="index" cols="6">
+                <v-col v-for="(age, index) in ages" :key="index" cols="4">
                   <v-checkbox
                     v-model="formClient.age"
                     :label="age.title"
                     :value="age.value"
                     color="primary"
+                    style="margin-bottom: -70px"
                   />
                 </v-col>
               </v-row>
@@ -201,6 +207,7 @@
                     :label="loc.title"
                     :value="loc.value"
                     color="primary"
+                    style="margin-bottom: -50px"
                   />
                 </v-col>
               </v-row>
@@ -210,6 +217,7 @@
                 chips
                 label="Выбранные локации для тренировок:"
                 readonly
+                style="margin-top: 20px; margin-bottom: -25px"
                 variant="underlined"
               />
               <v-text-field
@@ -239,6 +247,7 @@
                     :label="day.title"
                     :value="day.value"
                     color="primary"
+                    style="margin-bottom: -65px"
                   />
                 </v-col>
               </v-row>
@@ -248,6 +257,7 @@
                 chips
                 label="Выбранные дни тренировок:"
                 readonly
+                style="margin-top: 45px"
                 variant="underlined"
               />
             </v-card-text>
@@ -269,6 +279,7 @@
                     :label="tm.title"
                     :value="tm.value"
                     color="primary"
+                    style="margin-bottom: -70px"
                   />
                 </v-col>
               </v-row>
@@ -278,72 +289,86 @@
                 chips
                 label="Выбранное время для тренировок:"
                 readonly
+                style="margin-top: 35px; margin-bottom: -25px"
                 variant="underlined"
               />
             </v-card-text>
           </v-card>
 
           <v-card class="mb-4" elevation="10">
-            <v-card-text v-if="allert || base_allert">
-              <v-alert v-if="allert || base_allert" type="info" variant="outlined">
-                <p
-                  v-if="!formClient.name ||  !formClient.phone_number || formClient.name.length < 3 || formClient.phone_number.length < 10 || !Boolean(Number(formClient.phone_number))">
-                  Ошибка в полях Име и Телефон!</p>
-                <n-ul>
-                  <n-li v-if="!formClient.name"> Поле "Имя" обязательно к заполнению.</n-li>
-                  <n-li v-if="formClient.name && formClient.name.length >= 1 && formClient.name.length < 3">Минимальная
-                    длинна поля "Имя" 3
-                    символа.
-                  </n-li>
-                  <n-li v-if="!formClient.phone_number"> Поле "Телефон" обязательно к заполнению.</n-li>
-                  <n-li
-                    v-if="formClient.phone_number && formClient.phone_number.length >= 1 && formClient.phone_number.length < 10">
-                    Минимальная
-                    длинна поля "Телефон" 10 символов.
-                  </n-li>
-                  <n-li
-                    v-if="formClient.phone_number && formClient.phone_number.length > 1 && !Boolean(Number(formClient.phone_number))">
-                    В поле
-                    "Телефон" допустимы только цифры.
-                  </n-li>
-                </n-ul>
-                <p v-if="!formClient.choice">Вы не выбрали тип тренировки.</p>
-                <p v-if="formClient.choice && allert && base_allert">Вы не выбрали:</p>
-                <n-ul v-if="formClient.choice">
-                  <n-li
-                    v-if="formClient.choice === 'yoga' && formClient.yoga_type.length === 0 && formClient.other_yoga_type.length === 0">
-                    Тип секции для тренировок.
-                  </n-li>
-                  <n-li
-                    v-if="formClient.choice === 'martialArts' && formClient.matrial_arts_type.length === 0 && formClient.other_matrial_arts_type.length === 0">
-                    Тип секции для тренировок.
-                  </n-li>
-                  <n-li v-if="formClient.choice && formClient.age.length === 0">Возрастную категорию
-                    тренировок.
-                  </n-li>
-                  <n-li v-if="formClient.other_location.length === 0 && formClient.training_location.length ===0">
-                    Локацию для занятий.
-                  </n-li>
-                  <n-li v-if="formClient.training_time.length === 0">
-                    Время занятий.
-                  </n-li>
-                  <n-li v-if="!formClient.class_type">
-                    Тип занятий.
-                  </n-li>
-                  <n-li v-if="formClient.visit_day.length === 0">
-                    День посещения занятий.
-                  </n-li>
-                </n-ul>
-              </v-alert>
-            </v-card-text>
             <v-card-actions class="mt-2 mb-2" style="display: grid; place-items: center">
-              <v-btn :disabled="allert" block class="text-success text-caption text-capitalize" type="submit"
+              <v-btn v-if="!allert" :disabled="allert" block class="text-success text-caption text-capitalize" type="submit"
+                     variant="outlined">
+                Отправить форму
+              </v-btn>
+              <v-btn v-if="allert" block class="text-success text-caption text-capitalize" @click="dialog_error = true"
                      variant="outlined">
                 Отправить форму
               </v-btn>
             </v-card-actions>
           </v-card>
         </v-form>
+        <div class="text-center">
+          <v-dialog
+            v-model="dialog_error"
+            width="auto"
+          >
+            <v-card>
+              <v-card-text>
+                <v-alert icon="$error" title="Ошибка при заполнении формы." type="error" variant="outlined">
+                  <p v-if="!formClient.name"> Поле "Имя" обязательно к заполнению.</p>
+                  <p v-if="formClient.name && formClient.name.length >= 1 && formClient.name.length < 3">Минимальная
+                    длинна поля "Имя" 3
+                    символа.
+                  </p>
+                  <p v-if="!formClient.phone_number"> Поле "Телефон" обязательно к заполнению.</p>
+                  <n-ul>
+                    <n-li
+                      v-if="formClient.phone_number && formClient.phone_number.length >= 1 && formClient.phone_number.length < 10">
+                      Минимальная
+                      длинна поля "Телефон" 10 символов.
+                    </n-li>
+                    <n-li
+                      v-if="formClient.phone_number && formClient.phone_number.length > 1 && !Boolean(Number(formClient.phone_number))">
+                      В поле
+                      "Телефон" допустимы только цифры.
+                    </n-li>
+                  </n-ul>
+                  <p v-if="!formClient.choice">Вы не выбрали тип тренировки.</p>
+                  <p v-if="formClient.choice && allert && base_allert">Вы не выбрали:</p>
+                  <n-ul v-if="formClient.choice">
+                    <n-li
+                      v-if="formClient.choice === 'yoga' && formClient.yoga_type.length === 0 && formClient.other_yoga_type.length === 0">
+                      Тип секции для тренировок.
+                    </n-li>
+                    <n-li
+                      v-if="formClient.choice === 'martialArts' && formClient.matrial_arts_type.length === 0 && formClient.other_matrial_arts_type.length === 0">
+                      Тип секции для тренировок.
+                    </n-li>
+                    <n-li v-if="formClient.choice && formClient.age.length === 0">Возрастную категорию
+                      тренировок.
+                    </n-li>
+                    <n-li v-if="formClient.other_location.length === 0 && formClient.training_location.length ===0">
+                      Локацию для занятий.
+                    </n-li>
+                    <n-li v-if="formClient.training_time.length === 0">
+                      Время занятий.
+                    </n-li>
+                    <n-li v-if="!formClient.class_type">
+                      Тип занятий.
+                    </n-li>
+                    <n-li v-if="formClient.visit_day.length === 0">
+                      День посещения занятий.
+                    </n-li>
+                  </n-ul>
+                </v-alert>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn block color="error" @click="dialog_error = false">Закрыть</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
         <div class="text-center">
           <v-dialog
             v-model="dialog"
@@ -379,6 +404,7 @@ const time = ref([])
 const allert = ref(true)
 const base_allert = ref(true)
 const dialog = ref(false)
+const dialog_error = ref(false)
 const rules = ref(
   {
     requiredField: value => !!value || 'Обязательное поле.',
@@ -415,8 +441,8 @@ const height = computed(() => {
 
 const formClient = ref({
   choice: false,
-  name: '',
-  phone_number: '',
+  name: null,
+  phone_number: null,
   class_type: '',
   training_location: [],
   other_location: '',
@@ -436,8 +462,8 @@ const clear_data = async () => {
 }
 const clear_all_data = async () => {
   formClient.value.choice = false
-  formClient.value.name = ''
-  formClient.value.phone_number = ''
+  formClient.value.name = null
+  formClient.value.phone_number = null
   formClient.value.class_type = ''
   formClient.value.training_location = []
   formClient.value.other_location = ''

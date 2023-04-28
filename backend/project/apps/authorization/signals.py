@@ -1,7 +1,9 @@
-from django.db.models.signals import pre_save
+from django.db.models import QuerySet
+from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 
 from ..authorization.models import User
+from ..crm.models import CoachForClient, NewClientCoach
 
 
 @receiver(pre_save, sender=User)
@@ -25,3 +27,16 @@ def change_type_user(sender, instance: User, *args, **kwargs):
         instance.is_superuser = True
         instance.is_staff = True
         instance.user_group = User.EMPTY
+
+
+@receiver(pre_delete, sender=User)
+def delete_coach(sender, instance: User, *args, **kwargs):
+    first_admin = User.objects.filter(user_type=User.ADMIN).first()
+    worker(CoachForClient.objects.filter(coach=instance), first_admin)
+    worker(NewClientCoach.objects.filter(coach=instance), first_admin)
+
+
+def worker(data: QuerySet, admin: User):
+    for element in data:
+        element.coach = admin
+        element.save()

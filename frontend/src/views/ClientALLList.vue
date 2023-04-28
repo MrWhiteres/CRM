@@ -156,6 +156,7 @@ const height = computed(() => {
 
 const fetchData = async () => {
   try {
+    loading.value = true
     const response = await axios.get('client-all-list/')
     data.value = response.data.elements
     if (data.value.length === 0) {

@@ -6,4 +6,3 @@ class CrmConfig(AppConfig):
     name = 'project.apps.crm'
 
     verbose_name = "CRM часть"
-

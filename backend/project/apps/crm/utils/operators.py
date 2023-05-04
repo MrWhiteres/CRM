@@ -110,10 +110,10 @@ def return_base_and_other_data(data: dict) -> dict:
 
 def return_some_data(data: dict, key: str) -> dict:
     data_returned = dict()
-    data_returned['location'] = ', '.join([element.location for element in data[key]['location']])
-    data_returned['section'] = ', '.join([element.section for element in data[key]['section']])
-    data_returned['visit_time'] = ', '.join([element.time for element in data[key]['visit_time']])
-    data_returned['visit_day'] = ', '.join([element.day for element in data[key]['visit_day']])
+    data_returned['location'] = [element.location for element in data[key]['location']]
+    data_returned['section'] = [element.section for element in data[key]['section']]
+    data_returned['visit_time'] = [element.time for element in data[key]['visit_time']]
+    data_returned['visit_day'] = [element.day for element in data[key]['visit_day']]
     data_returned['class_type'] = return_class_type(data[key]['class_type'])
     data_returned['age'] = return_age(data[key]['age'])
     del data[key]['location']
@@ -145,38 +145,6 @@ def return_age(data: int) -> str:
 
 def return_class_type(data: int) -> str:
     return GroupType.objects.get(id=data).class_type
-
-
-def convert_list_to_string(data: list) -> str:
-    return ', '.join(data)
-
-
-def return_location(data: list) -> list:
-    return [
-        element.location
-        for element in data
-    ]
-
-
-def return_time(data: list) -> list:
-    return [
-        element.time
-        for element in data
-    ]
-
-
-def return_day_by_id(data: list) -> list:
-    return [
-        element.day
-        for element in data
-    ]
-
-
-def return_section(data: list) -> list:
-    return [
-        element.section
-        for element in data
-    ]
 
 
 def return_data(element: Clients) -> dict:

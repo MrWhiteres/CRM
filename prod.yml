@@ -55,16 +55,16 @@ services:
       dockerfile: Dockerfile
     command: >
       sh -c "
-      python3 manage.py makemigrations --noinput &&
-             python3 manage.py migrate --noinput &&
-             python3 manage.py loaddata data/time_data.json &&
-             python3 manage.py loaddata data/location.json &&
-             python3 manage.py loaddata data/section.json &&
-             python3 manage.py loaddata data/days.json &&
-             python3 manage.py loaddata data/age.json &&
-             python3 manage.py loaddata data/groups_type.json &&
-             python3 manage.py collectstatic --noinput &&
-             gunicorn --config project/settings/gunicorn_config.py project.network.wsgi:application --reload --preload
+      python3 manage.py makemigrations &&
+      python3 manage.py migrate  &&
+      python3 manage.py loaddata data/time_data.json &&
+      python3 manage.py loaddata data/location.json &&
+      python3 manage.py loaddata data/section.json &&
+      python3 manage.py loaddata data/days.json &&
+      python3 manage.py loaddata data/age.json &&
+      python3 manage.py loaddata data/groups_type.json &&
+      python3 manage.py collectstatic --noinput &&
+      gunicorn --config project/settings/gunicorn_config.py project.network.wsgi:application --reload --preload
       "
     volumes:
       - ./backend/:/backend
@@ -93,11 +93,6 @@ services:
     volumes:
       - ./backend/static:/static
       - ./backend/media:/media
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail http://localhost:8080/api/ || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     ports:
       - published: 8080
         target: 80

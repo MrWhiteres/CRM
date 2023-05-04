@@ -256,16 +256,6 @@ def convert_location(data: str) -> Location:
     return Location.objects.get(location=data)
 
 
-def return_correct_data(client: Clients, data: dict, key: str) -> str:
-    for element in data['clients']:
-        if element['id'] == client.id:
-            try:
-                return element[key]
-            except KeyError:
-                return [element_inner[key] for element_inner in element['details'] if key in element_inner][0]
-    return [element[key] for element in data['clients'] if element['id'] == client.id][0]
-
-
 def cleared_data(data: dict) -> dict:
     return dict(
         clients=[
@@ -278,14 +268,6 @@ def cleared_data(data: dict) -> dict:
             if len(element['details']) > 0 and element['status'] != Clients.NOT_CHECKED
         ]
     )
-
-
-def return_query_set_clients(list_id: list) -> list:
-    return Clients.objects.filter(id__in=list_id)
-
-
-def get_temporary_clients(clients: list, coach: User) -> list:
-    return NewClientCoach.objects.filter(coach=coach, client__in=clients)
 
 
 def return_time() -> list:

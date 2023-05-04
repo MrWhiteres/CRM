@@ -1,7 +1,6 @@
 from django.db import IntegrityError
 
 from . import check_client
-from .operators import return_location
 from ..models import Clients, FormClient, OtherData, AllTime, Location, Days, Age, GroupType, Section
 
 

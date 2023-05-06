@@ -123,5 +123,4 @@ class ClassAttendanceAdmin(ModelAdmin):
         ('Дата посещения:', {'fields': ('date',)}),
     )
     list_display = ('id', 'client', 'visit', 'date')
-    readonly_fields = ('client', 'date')
     model = ClassAttendance

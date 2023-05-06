@@ -5,21 +5,21 @@ from django.utils import timezone
 
 from . import check_client
 from .operators import return_client_data
-from ..models import CoachForClient, Clients, ClassAttendance, NewClientCoach, AllTime, GroupType, Days, Age, Section, \
-    Location
+from ..models import (
+    CoachForClient, Clients, ClassAttendance,
+    NewClientCoach, AllTime, GroupType, Days,
+    Age, Section, Location, FormClient
+)
 from ...authorization.models import User
 
 
 def get_clients_for_coach(user: User) -> list:
     clients = CoachForClient.objects.filter(coach=user)
     client: CoachForClient
-    return [dict(
-        id=client.client.id,
-        fullname=client.client.fullname,
-        phone_number=client.client.phone_number,
-        payed_status=change_status(client.client.payed_status),
-        status=change_status(client.client.payed_status),
-    ) for client in clients]
+    return [{'id': client.client.id, 'fullname': client.client.fullname, 'phone_number': client.client.phone_number,
+             'payed_status': change_status(client.client.payed_status),
+             'status': change_status(client.client.payed_status), 'exist': get_visit(client.client)} for client in
+            clients]
 
 
 def change_status(status: str) -> str:
@@ -27,7 +27,7 @@ def change_status(status: str) -> str:
 
 
 def get_status_paid() -> list:
-    return [dict(label=list(element)[1], value=list(element)[0]) for element in Clients.PAID_STATUS]
+    return [list(element)[1] for element in Clients.PAID_STATUS]
 
 
 def clear_data(data: dict) -> dict:
@@ -62,11 +62,20 @@ def check_create_client(client: dict, coach: User, time_correct: datetime) -> di
             group_type=client['class_type'], age=client['age']
         )
         correct_client.status = correct_client.RECORDED
+    correct_client.fullname = client['fullname']
     correct_client.payed_status = return_payed_status(client['status'])
     if correct_client.payed_status == 'paid':
         correct_client.payed_date = f'{time_correct.year}-{time_correct.month}-{time_correct.day}'
     correct_client.save()
     return dict(client=correct_client, exist=client['exist'])
+
+
+def get_visit(client: Clients) -> bool:
+    try:
+        exist = ClassAttendance.objects.get(client=client, date=datetime.now().date())
+        return exist.visit
+    except ClassAttendance.DoesNotExist:
+        return False
 
 
 def create_visit(visit: bool, client: Clients):
@@ -92,14 +101,14 @@ def create_relationship(
     try:
         model = CoachForClient.objects.get(
             coach=coach, client=client,
-            group_type=return_group_type_by_id(group_type),
-            age=return_age_by_id(age)
+            group_type=group_type,
+            age=age
         )
     except CoachForClient.DoesNotExist:
         model = CoachForClient.objects.create(
             coach=coach, client=client,
-            group_type=return_group_type_by_id(group_type),
-            age=return_age_by_id(age)
+            group_type=group_type,
+            age=age
         )
         model.save()
     if visit_time:
@@ -140,7 +149,6 @@ def change_choose_data(data: list) -> list:
         element['section'] = recreate_date(element['section'])
         element['class_type'] = [{'title': 'Персональные', 'value': 'single'},
                                  {'title': 'Групповые', 'value': 'group'}]
-        element['details'] = []
 
     return data
 
@@ -182,24 +190,24 @@ def return_coach_status(status: str) -> str:
 
 
 def create_new_clients_coach(data: dict, coach: User):
-    data = cleared_data(data)
+    data = convert_data(cleared_data(data))
     if not data:
         return
-    data = convert_data(data)
-
     for element in data['clients']:
         client: Clients = element['client']
+        client.fullname = element['name']
         client.payed_status = Clients.NEW_CLIENT
         client.status_coach = element['status']
         client.save()
         delete_temporary_coach_client(coach=coach, client=client)
         if client.status_coach == Clients.NOT_RECORDED:
             continue
-        for detail in element["details"]:
+        for detail in FormClient.objects.filter(client=client):
             create_relationship(
                 coach=coach, client=client,
-                visit_time=detail['visit_time'], visit_day=detail['visit_day'],
-                group_type=detail['class_type'], age=detail['age']
+                visit_time=[element.id for element in detail.visit_time.all()],
+                visit_day=[element.id for element in detail.visit_day.all()],
+                group_type=detail.class_type, age=detail.age
             )
 
 
@@ -211,14 +219,10 @@ def delete_temporary_coach_client(coach: User, client: Clients):
 
 
 def convert_data(data: dict) -> dict:
-    return dict(
-        clients=[
-            dict(
-                client=Clients.objects.get(id=element['id']),
-                status=element['status'],
-                details=convert_details(element['details'], element["age"]))
-            for element in data['clients']]
-    )
+    print(data)
+    return {'clients': [
+        {'client': Clients.objects.get(id=element['id']), 'status': element['status'], 'name': element['fullname']}
+        for element in data['clients']]}
 
 
 def convert_details(data: list, age: str) -> list:
@@ -257,17 +261,11 @@ def convert_location(data: str) -> Location:
 
 
 def cleared_data(data: dict) -> dict:
-    return dict(
-        clients=[
-            dict(
-                id=element['id'],
-                status=element['status'],
-                details=element['details'],
-                age=element['age'],
-            ) for element in data['clients']
-            if len(element['details']) > 0 and element['status'] != Clients.NOT_CHECKED
-        ]
-    )
+    return {'clients': [
+        {'id': element['id'], 'status': element['status'], 'fullname': element['fullname']}
+        for element in data['clients']
+        if element['status'] != Clients.NOT_CHECKED
+    ]}
 
 
 def return_time() -> list:

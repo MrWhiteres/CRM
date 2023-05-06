@@ -37,4 +37,4 @@ class EditProfileSerializer(Serializer):
     first_name = CharField(required=False, max_length=50)
     last_name = CharField(required=False, max_length=50)
     image = ImageField(required=False)
-    phone_number = CharField(required=False, min_length=10, max_length=15)
+    phone_number = CharField(required=False, max_length=15)

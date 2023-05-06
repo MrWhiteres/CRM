@@ -23,6 +23,7 @@ from .utils.operators import (
     get_group_client_status, get_all_coach,
     add_clients_to_coach, get_all_clients
 )
+from .utils.visit import return_data_visit
 
 
 class HealsCheckAPI(RetrieveAPIView):
@@ -98,8 +99,8 @@ class NewClientsWithFormsAPI(CreateAPIView, RetrieveAPIView):
         return JsonResponse(data=get_form_data(), status=HTTP_200_OK)
 
     def post(self, request, *args, **kwargs) -> JsonResponse:
-        register_client(self.serializer_data(clean_data(request.data)))
-        return JsonResponse(data=request.data, status=HTTP_200_OK)
+        register_client(self.serializer_data(clean_data(request.data)), request.user)
+        return JsonResponse(data={}, status=HTTP_200_OK)
 
 
 class AdminAndOperatorForm(CreateAPIView, RetrieveAPIView):
@@ -138,3 +139,10 @@ class AllClients(RetrieveAPIView):
             },
             status=HTTP_200_OK
         )
+
+
+class VisitTable(RetrieveAPIView, CreateAPIView):
+    permission_classes = [HeightRank]
+
+    def post(self, request, *args, **kwargs) -> JsonResponse:
+        return JsonResponse(data=return_data_visit(request.user, request.data), status=HTTP_200_OK)

@@ -1,10 +1,12 @@
 from django.db import IntegrityError
 
 from . import check_client
+from .coach import create_relationship
 from ..models import Clients, FormClient, OtherData, AllTime, Location, Days, Age, GroupType, Section
+from ...authorization.models import User
 
 
-def register_client(data: dict):
+def register_client(data: dict, user: User):
     if not check_client(data['phone_number']):
         Clients.objects.create(
             fullname=data['name'], phone_number=data['phone_number'],
@@ -12,8 +14,8 @@ def register_client(data: dict):
             status_coach=Clients.NOT_CHECKED, status_operator=Clients.NOT_CHECK
         ).save()
     client = check_client(data['phone_number'])
-    data_base: dict = dict(client=client)
-    data_other: dict = dict(client=client)
+    data_base: dict = {'client': client}
+    data_other: dict = {'client': client}
 
     if loc := data.get('training_location'):
         data_base['location'] = return_location(loc)
@@ -34,6 +36,18 @@ def register_client(data: dict):
 
     dict_filter(data_base, FormClient)
     dict_filter(data_other, OtherData)
+    if user.is_anonymous or user.user_type not in ['coach', 'head_coach']:
+        return
+
+    create_relationship(
+        client=client, coach=user, visit_time=data_base['visit_time'],
+        visit_day=data_base['visit_day'],
+        group_type=data_base['class_type'], age=data_base['age']
+    )
+    client.status = Clients.RECORDED
+    client.status_operator = Clients.CHECKED_UPLOAD
+    client.status_coach = Clients.RECORDED
+    client.save()
 
 
 def return_location(data: list) -> list:
@@ -79,7 +93,7 @@ def return_section_by_list(data: list) -> list:
 
 def return_time_by_id(data: list) -> list:
     return [
-        element
+        element.id
         for element in AllTime.objects.filter(id__in=data)
     ]
 

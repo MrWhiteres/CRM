@@ -17,8 +17,11 @@
 
 
     <v-list-item v-if="['Тренер', 'Старший тренер'].includes(user.type)"
-                 prepend-icon="mdi-view-dashboard" title="Таблица посещений"
+                 prepend-icon="mdi-view-dashboard" title="Отметить посещение"
                  value="Таблица" @click="this.$router.push({name: 'couch-table'})"/>
+    <v-list-item v-if="['Тренер', 'Старший тренер'].includes(user.type)"
+                 prepend-icon="mdi-view-dashboard" title="Таблица посещений"
+                 value="Таблица" @click="this.$router.push({name: 'visit-table'})"/>
 
     <v-list-item v-if="['Оператор', 'Администратор'].includes(user.type)"
                  prepend-icon="mdi-view-dashboard" title="Таблица новых клиентов"

@@ -20,6 +20,10 @@
     </v-tab>
     <v-tab v-if="['Тренер', 'Старший тренер'].includes(user.type)"
            value="2" @click="router.push({name: 'couch-table'})">
+      Отметить посещение
+    </v-tab>
+    <v-tab v-if="['Тренер', 'Старший тренер'].includes(user.type)"
+           value="6" @click="router.push({name: 'visit-table'})">
       Таблица посещений
     </v-tab>
     <v-tab v-if="['Оператор', 'Администратор'].includes(user.type)"

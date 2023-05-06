@@ -88,7 +88,7 @@ class Clients(Model):
 class ClassAttendance(Model):
     visit = BooleanField(default=False, verbose_name='Посещение')
     client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
-    date = DateField(auto_now_add=True, verbose_name='Дата посещения')
+    date = DateField(verbose_name='Дата посещения')
 
     def __str__(self) -> str:
         return f"{self.client} - {self.date}"
@@ -204,7 +204,7 @@ class CoachForClient(Model):
 
 class NewClientCoach(Model):
     coach = ForeignKey(User, verbose_name='Тренер', on_delete=DO_NOTHING)
-    client = ForeignKey(Clients, verbose_name='Клиент', on_delete=DO_NOTHING)
+    client = ForeignKey(Clients, verbose_name='Клиент', on_delete=CASCADE)
 
     def __str__(self):
         return f"Тренер - {self.coach.first_name} / Клиент {self.client.fullname}"

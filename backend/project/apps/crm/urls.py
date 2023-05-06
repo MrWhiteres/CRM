@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (
     CoachClients, NewClientsWithFormsAPI,
     AdminAndOperatorForm,
-    HealsCheckAPI, AllClients, NewClientsCoach
+    HealsCheckAPI, AllClients, NewClientsCoach,
+    VisitTable
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('client-list/', AdminAndOperatorForm.as_view()),
     path('client-all-list/', AllClients.as_view()),
     path('new-clients/', NewClientsCoach.as_view()),
+    path('visit/', VisitTable.as_view()),
 ]

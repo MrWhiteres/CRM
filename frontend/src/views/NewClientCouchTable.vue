@@ -5,7 +5,9 @@
     <v-card-text>
       <n-space justify="space-between">
         <v-btn :loading="loading" class="text-caption" variant="outlined" @click="fetchData">Обновить таблицу</v-btn>
-        <v-btn :loading="submit" :disabled="items.length === 0" class="text-caption" variant="outlined" @click="submitForm">Сохранить данные</v-btn>
+        <v-btn :disabled="items.length === 0" :loading="submit" class="text-caption" variant="outlined"
+               @click="submitForm">Сохранить данные
+        </v-btn>
       </n-space>
     </v-card-text>
     <v-container v-if="items.length > 0" style="min-width: 90%">
@@ -19,142 +21,19 @@
         style="min-width: 100%; min-height: 100%;"
         width="100%"
       >
+        <template v-slot:item.fullname="{ item }">
+          <v-text-field
+          v-model="item.props.title.fullname"
+          style="min-width: 200px"
+          variant="underlined"
+          />
+        </template>
         <template v-slot:item.status="{ item }">
           <n-select
             v-model:value="item.props.title.status"
             :options="status"
             style="width: 140px"
           />
-        </template>
-        <template v-slot:item.details="{ item }">
-          {{ item.props.title.details.length }}
-        </template>
-        <template v-slot:expanded-row="{ columns, item }">
-          <div class="text-center">
-            <v-dialog
-              v-model="dialog"
-              width="auto"
-            >
-              <v-card border rounded>
-                <v-card-title class="text-center text-h5">Данные посещения:</v-card-title>
-                <v-card-text>
-                  <v-card :width="height === 220 ? 260 : 500" border style="padding: 10px">
-                    <v-card-subtitle class="text-center">
-                      Локация тренировки:
-                    </v-card-subtitle>
-                    <v-row>
-                      <v-col v-for="(location, index) in selected_item.location" :key="index"
-                             :cols="height === 220 ? 8 : 7">
-                        <v-checkbox
-                          v-model="new_item.location"
-                          :label="location.title"
-                          :value="location.value"
-                          color="primary"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
-                    <v-card-subtitle class="text-center">
-                      Тип тренировки:
-                    </v-card-subtitle>
-                    <v-row>
-                      <v-col v-for="(class_type, index) in selected_item.class_type" :key="index"
-                             :cols="height === 220 ? 8 : 7">
-                        <v-checkbox
-                          v-model="new_item.class_type"
-                          :label="class_type.title"
-                          :value="class_type.title"
-                          color="primary"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
-                    <v-card-subtitle class="text-center">
-                      Секция:
-                    </v-card-subtitle>
-                    <v-row>
-                      <v-col v-for="(section, index) in selected_item.section" :key="index"
-                             :cols="height === 220 ? 6 : 6">
-                        <v-checkbox
-                          v-model="new_item.section"
-                          :label="section.title"
-                          :value="section.value"
-                          color="primary"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
-                    <v-card-subtitle class="text-center">
-                      Время тренировки:
-                    </v-card-subtitle>
-                    <v-row>
-                      <v-col v-for="(visit_time, index) in selected_item.visit_time" :key="index"
-                             :cols="height === 220 ? 5 : 4">
-                        <v-checkbox
-                          v-model="new_item.visit_time"
-                          :label="visit_time.title"
-                          :value="visit_time.value"
-                          color="primary"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
-                    <v-card-subtitle class="text-center">
-                      Дни тренировки:
-                    </v-card-subtitle>
-                    <v-row>
-                      <v-col v-for="(day, index) in  selected_item.visit_day" :key="index"
-                             :cols="height > 220 ? 6 : 12">
-                        <v-checkbox
-                          v-model="new_item.visit_day"
-                          :label="day.title"
-                          :value="day.value"
-                          color="primary"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-divider class="border-opacity-50" style="margin-top: 10px"/>
-                  </v-card>
-                </v-card-text>
-                <v-card-actions style="display:grid; place-items: center">
-                  <v-row>
-                    <v-col cols=6>
-                      <v-btn class="text-caption" variant="outlined" @click="dialog = false">Отменить</v-btn>
-                    </v-col>
-                    <v-col cols=6>
-                      <v-btn :disabled="button_add" class="text-caption" variant="outlined"
-                             @click="new_client(item.props.title)">Добавить
-                      </v-btn>
-                    </v-col>
-                    <v-divider class="border-opacity-100" style="margin-top: 10px"/>
-                  </v-row>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </div>
-          <tr v-if="item.props.title.status === 'recorded'">
-            <td :colspan="columns.length">
-              <v-card-subtitle class="text-center">
-                <v-btn class="text-caption" variant="outlined"
-                       @click="selected_item = item.props.title; dialog = true">Добавить посещение для клиента,
-                  {{ item.props.title.fullname }}
-                </v-btn>
-              </v-card-subtitle>
-            </td>
-          </tr>
-          <tr v-if="item.props.title.details && item.props.title.details.length > 0">
-            <td :colspan="columns.length">
-              <v-data-table
-                :headers="sub_headers"
-                :items="item.props.title.details"
-                class="elevation-1"
-                height="100%"
-                style="min-width: 100%; min-height: 100%;"
-                width="100%"
-              />
-
-            </td>
-          </tr>
         </template>
       </v-data-table>
     </v-container>
@@ -192,45 +71,12 @@ const new_item = ref({
   visit_day: '',
   location: ''
 })
-const expand = ref([]);
 const headers = [
-  {title: "", key: "data-table-expand"},
   {title: 'Фамилия Имя', key: 'fullname'},
   {title: 'Номер телефона', key: 'phone_number'},
   {title: 'Статус клиента', key: 'status'},
-  {title: 'Количество записей', key: 'details'},
 ];
-const subHeaders = ref([
-  {title: "Место проведения", key: "location"},
-  {title: "День проведения", key: "visit_day"},
-  {title: "Время проведения", key: "visit_time"},
-  {title: "Секция", key: "section"},
-  {title: "Тип группы", key: "class_type"},
-])
 const button_add = ref(true)
-const sub_headers = ref([
-  {
-    title: "Место проведения",
-    key: "location",
-  },
-  {
-    title: "День проведения",
-    key: "visit_day",
-  },
-  {
-    title: "Время проведения",
-    key: "visit_time",
-    width: 150,
-  },
-  {
-    title: "Секция",
-    key: "section",
-  },
-  {
-    title: "Тип группы",
-    key: "class_type",
-  },
-])
 const {name} = useDisplay()
 const height = computed(() => {
   switch (name.value) {

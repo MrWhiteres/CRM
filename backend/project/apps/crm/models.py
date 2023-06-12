@@ -88,7 +88,7 @@ class Clients(Model):
 class ClassAttendance(Model):
     visit = BooleanField(default=False, verbose_name='Посещение')
     client = ForeignKey(Clients, on_delete=CASCADE, verbose_name='Клиент')
-    date = DateField(verbose_name='Дата посещения')
+    date = DateField(auto_now=True, verbose_name='Дата посещения')
 
     def __str__(self) -> str:
         return f"{self.client} - {self.date}"
